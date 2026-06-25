@@ -14,11 +14,14 @@ router = APIRouter(
 
 
 @router.post("/create", status_code=status.HTTP_204_NO_CONTENT)
-def user_create(_user_create: user_schema.UserCreate, db: Session=Depends(get_db)):
+def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_db)):
     user = user_crud.get_existing_user(db, user_create=_user_create)
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This user already exists.")
-    user_crud.create_user(db=db, user_create=_user_create)
+    
+    result = user_crud.create_user(db=db, user_create=_user_create)
+    if not result:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Maximum Number of Members({user_crud.MAX_ACCOUNT})has been exceeded.")
 
 
 @router.post("/login", response_model=user_schema.Token)
