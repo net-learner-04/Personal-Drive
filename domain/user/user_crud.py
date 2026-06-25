@@ -2,12 +2,16 @@ from sqlalchemy.orm import Session
 from domain.user.user_schema import UserCreate
 from models import Users
 from passlib.context import CryptContext
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 passwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+MAX_ACCOUNT = int(os.getenv("MAX_ACCOUNT"))
 
-MAX_ACCOUNT = 4
-
+def get_existing_user(db: Session, user_create: UserCreate):
+    return db.query(Users).filter(Users.name == user_create.name).first()
 
 def create_user(db: Session, user_create: UserCreate):
     user_count = db.query(Users).count()
@@ -22,11 +26,3 @@ def create_user(db: Session, user_create: UserCreate):
     db.add(db_user)
     db.commit()
     return True
-
-
-def get_user(db: Session, username: str):
-    return db.query(Users).filter(Users.name == username).first()
-
-
-def get_existing_user(db: Session, user_create: UserCreate):
-    return db.query(Users).filter(Users.name == user_create.name).first()
