@@ -6,10 +6,15 @@ from sqlalchemy.orm import Session
 from starlette import status
 from db import get_db
 from models import Users, Files
+from dotenv import load_dotenv
 from auth import get_current_user
 from datetime import datetime
 
-UPLOAD_DIR = "./uploads"
+
+load_dotenv()
+
+UPLOAD_DIR = str(os.getenv("UPLOAD_DIR"))
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
@@ -22,7 +27,7 @@ async def upload_file(
     db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
-    file_path = os.path.join(UPLOAD_DIR, f"{current_user.id}_{file.filename}")
+    file_path = os.path.join(current_user.storage_path, file.filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
