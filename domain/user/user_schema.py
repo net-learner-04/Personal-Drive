@@ -48,6 +48,24 @@ class UserUpdateEmail(BaseModel):
         return v
 
 
+class UserUpdatePassword(BaseModel):
+    current_password: str
+    new_password: str
+    new_password2: str
+
+    @field_validator('current_password', 'new_password', 'new_password2')
+    def not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Blank entries are not allowed.")
+        return v
+
+    @field_validator('new_password2')
+    def passwd_check(cls, v, info: FieldValidationInfo):
+        if 'new_password' in info.data and v != info.data['new_password']:
+            raise ValueError("Password does not match.")
+        return v
+
+
 class UserDelete(BaseModel):
     password: str
 
@@ -69,3 +87,16 @@ class EmailVerifyRequest(BaseModel):
 class EmailVerifyConfirm(BaseModel):
     email: EmailStr
     code: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str | None
+    is_admin: bool
+    failed_login: int
+    locked_until: str | None
+    storage_path: str | None
+
+    class Config:
+        from_attributes = True
