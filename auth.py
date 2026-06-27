@@ -7,10 +7,11 @@ from sqlalchemy.orm import Session
 from starlette import status
 from db import get_db
 from models import Users
+import os
 
-SECRET_KEY = ""
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+SECRET_KEY = str(os.getenv("SECRET_KEY"))
+ALGORITHM = str(os.getenv("ALGORITHM"))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/login")
 
