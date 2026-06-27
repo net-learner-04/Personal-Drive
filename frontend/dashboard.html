@@ -6,30 +6,56 @@
   <title>Dashboard — Personal-Drive</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    .modal-overlay { position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s ease; }
-    .modal-overlay.open { opacity:1;pointer-events:all; }
-    .modal { width:100%;max-width:420px;padding:2rem;animation:modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-    @keyframes modal-in { from{opacity:0;transform:scale(0.94) translateY(16px)} to{opacity:1;transform:none} }
-    .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem; }
-    .modal-title { font-size:1.15rem;font-weight:800;letter-spacing:-0.4px; }
-    .modal-close { background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center; }
-    .modal-close:hover { color:var(--text);background:var(--surface2); }
+    .modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{width:100%;max-width:440px;padding:2rem;animation:modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+    .modal-lg{max-width:640px;}
+    @keyframes modal-in{from{opacity:0;transform:scale(0.94) translateY(16px)}to{opacity:1;transform:none}}
+    .modal-header{display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;}
+    .modal-title{font-size:1.1rem;font-weight:800;letter-spacing:-0.3px;flex:1;}
+    .modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center;}
+    .modal-close:hover{color:var(--text);background:var(--surface2);}
 
-    .settings-list { display:flex;flex-direction:column;gap:0.5rem;margin-top:0.25rem; }
-    .settings-item { display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t); }
-    .settings-item:hover { background:var(--glass-h);border-color:rgba(99,102,241,0.3);transform:translateX(3px); }
-    .settings-item.danger:hover { border-color:rgba(244,63,94,0.35);background:rgba(244,63,94,0.06); }
-    .settings-icon { width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-    .settings-icon.blue { background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc; }
-    .settings-icon.red { background:rgba(244,63,94,0.12);color:var(--danger); }
-    .settings-label { font-size:0.9rem;font-weight:600; }
-    .settings-sub { font-size:0.76rem;color:var(--text3);margin-top:0.1rem; }
+    .settings-list{display:flex;flex-direction:column;gap:0.45rem;}
+    .settings-item{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t);}
+    .settings-item:hover{background:var(--glass-h);border-color:rgba(99,102,241,0.3);transform:translateX(3px);}
+    .settings-item.danger:hover{border-color:rgba(244,63,94,0.35);background:rgba(244,63,94,0.06);}
+    .settings-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .settings-icon.blue{background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc;}
+    .settings-icon.red{background:rgba(244,63,94,0.12);color:var(--danger);}
+    .settings-label{font-size:0.9rem;font-weight:600;}
+    .settings-sub{font-size:0.76rem;color:var(--text3);margin-top:0.1rem;}
 
-    .user-row-clickable { cursor:pointer;transition:all var(--t); }
-    .user-row-clickable:hover { background:var(--surface2); }
+    .user-row-clickable{cursor:pointer;transition:all var(--t);}
+    .user-row-clickable:hover{background:var(--surface2);}
 
-    .input-with-btn { display:flex;gap:0.5rem; }
-    .input-with-btn input { flex:1; }
+    .toolbar{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+    .search-wrap{flex:1;min-width:200px;position:relative;}
+    .search-wrap svg{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;}
+    .search-input{padding-left:2.5rem !important;}
+    .sort-select{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:0.85rem;padding:0.6rem 0.9rem;cursor:pointer;backdrop-filter:blur(10px);}
+
+    .breadcrumb{display:flex;align-items:center;gap:0.3rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .breadcrumb-item{font-size:0.85rem;font-weight:600;color:var(--text2);cursor:pointer;padding:0.2rem 0.5rem;border-radius:6px;transition:all var(--t);}
+    .breadcrumb-item:hover{color:var(--accent);background:rgba(99,102,241,0.08);}
+    .breadcrumb-item.active{color:var(--text);cursor:default;}
+    .breadcrumb-item.active:hover{background:transparent;}
+    .breadcrumb-sep{color:var(--text3);font-size:0.8rem;}
+
+    .preview-content{display:flex;align-items:center;justify-content:center;min-height:300px;max-height:60vh;overflow:auto;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--glass-b);}
+    .preview-content img{max-width:100%;max-height:60vh;border-radius:var(--radius-sm);}
+    .preview-content iframe{width:100%;height:60vh;border:none;border-radius:var(--radius-sm);}
+    .preview-content pre{padding:1.5rem;color:var(--text);font-size:0.85rem;white-space:pre-wrap;word-break:break-all;text-align:left;width:100%;}
+
+    .share-url-box{display:flex;gap:0.5rem;margin-top:0.5rem;}
+    .share-url-box input{flex:1;font-size:0.82rem;}
+    .copy-btn{flex-shrink:0;}
+
+    .file-card .action-share{color:#a5b4fc;}
+    .file-card .action-share:hover{color:var(--accent);background:rgba(99,102,241,0.1);}
+
+    .folder-card{border-color:rgba(99,102,241,0.2);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04));}
+    .folder-card:hover{border-color:rgba(99,102,241,0.4);}
   </style>
 </head>
 <body>
@@ -54,6 +80,11 @@
         <div class="nav-item" id="nav-upload" onclick="switchTab('upload',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
           Upload
+        </div>
+        <div class="sidebar-section" style="margin-top:0.5rem;">Admin</div>
+        <div class="nav-item" id="nav-admin" onclick="window.location.href='admin.html'" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Admin Panel
         </div>
       </nav>
       <div class="sidebar-bottom">
@@ -101,7 +132,26 @@
         <div id="globalAlert" class="alert" style="margin-bottom:1.25rem;"></div>
 
         <div id="tab-files">
-          <div class="section-hdr"><span class="section-title">All Files</span></div>
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" type="text" id="searchInput" placeholder="Search files..." oninput="handleSearch()"/>
+            </div>
+            <select class="sort-select" id="sortSelect" onchange="loadFiles()">
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="name-asc">Name A–Z</option>
+              <option value="name-desc">Name Z–A</option>
+              <option value="size-desc">Largest first</option>
+              <option value="size-asc">Smallest first</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="openNewFolder()" style="gap:0.4rem;flex-shrink:0;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+              New Folder
+            </button>
+          </div>
+
+          <div class="breadcrumb" id="breadcrumb"></div>
           <div id="fileList" class="file-list"></div>
         </div>
 
@@ -114,7 +164,7 @@
             </div>
             <h3>Drop files here</h3>
             <p>or <span class="browse">browse your computer</span></p>
-            <p style="margin-top:0.4rem;font-size:0.76rem;">Any file type · No size limit</p>
+            <p style="margin-top:0.4rem;font-size:0.76rem;">Uploads go to current folder</p>
             <input type="file" id="fileInput" multiple style="display:none;"/>
           </div>
           <div class="progress-wrap" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
@@ -124,15 +174,77 @@
     </main>
   </div>
 
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsOverlay" onclick="handleOverlayClick(event)">
-    <div class="glass modal" id="settingsModal">
+  <!-- Preview Modal -->
+  <div class="modal-overlay" id="previewOverlay" onclick="handleOverlayClick(event,'previewOverlay')">
+    <div class="glass modal modal-lg">
+      <div class="modal-header">
+        <span class="modal-title" id="previewTitle">Preview</span>
+        <button class="btn btn-ghost btn-sm" id="previewDownloadBtn">Download</button>
+        <button class="modal-close" onclick="closeModal('previewOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="preview-content" id="previewContent"></div>
+    </div>
+  </div>
 
-      <!-- Gate: password verify -->
+  <!-- Share Modal -->
+  <div class="modal-overlay" id="shareOverlay" onclick="handleOverlayClick(event,'shareOverlay')">
+    <div class="glass modal">
+      <div class="modal-header">
+        <span class="modal-title">Share File</span>
+        <button class="modal-close" onclick="closeModal('shareOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div id="shareAlert" class="alert" style="margin-bottom:1rem;"></div>
+      <div class="form-stack">
+        <div class="form-group">
+          <label>Link expires after</label>
+          <select class="sort-select" id="shareExpiry" style="width:100%;">
+            <option value="1">1 hour</option>
+            <option value="6">6 hours</option>
+            <option value="24" selected>24 hours</option>
+            <option value="72">3 days</option>
+            <option value="168">7 days</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="shareBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Generate Link
+        </button>
+        <div id="shareResult" style="display:none;">
+          <div class="form-group">
+            <label>Share URL</label>
+            <div class="share-url-box">
+              <input type="text" id="shareUrl" readonly/>
+              <button class="btn btn-ghost btn-sm copy-btn" onclick="copyShareUrl()">Copy</button>
+            </div>
+          </div>
+          <p style="color:var(--text3);font-size:0.78rem;margin-top:0.5rem;" id="shareExpireInfo"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Folder Modal -->
+  <div class="modal-overlay" id="folderOverlay" onclick="handleOverlayClick(event,'folderOverlay')">
+    <div class="glass modal">
+      <div class="modal-header">
+        <span class="modal-title">New Folder</span>
+        <button class="modal-close" onclick="closeModal('folderOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div id="folderAlert" class="alert" style="margin-bottom:1rem;"></div>
+      <div class="form-stack">
+        <div class="form-group"><label>Folder name</label><input type="text" id="folderName" placeholder="Enter folder name"/></div>
+        <button class="btn btn-primary" id="folderBtn">Create Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsOverlay" onclick="handleOverlayClick(event,'settingsOverlay')">
+    <div class="glass modal">
       <div id="gatePanel">
         <div class="modal-header">
           <span class="modal-title">Confirm Identity</span>
-          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1.25rem;">Enter your password to access account settings.</p>
         <div id="gateAlert" class="alert" style="margin-bottom:1rem;"></div>
@@ -145,11 +257,10 @@
         </div>
       </div>
 
-      <!-- Settings menu -->
       <div id="settingsPanel" style="display:none;">
         <div class="modal-header">
           <span class="modal-title">Account Settings</span>
-          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div id="settingsAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="settings-list">
@@ -161,6 +272,10 @@
             <div class="settings-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
             <div><div class="settings-label">Change Email</div><div class="settings-sub">Update your email address</div></div>
           </div>
+          <div class="settings-item" onclick="showSubPanel('passwordPanel')">
+            <div class="settings-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div><div class="settings-label">Change Password</div><div class="settings-sub">Update your login password</div></div>
+          </div>
           <div class="settings-item danger" onclick="showSubPanel('deletePanel')">
             <div class="settings-icon red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
             <div><div class="settings-label" style="color:var(--danger);">Delete Account</div><div class="settings-sub">Permanently remove your account and all files</div></div>
@@ -168,12 +283,11 @@
         </div>
       </div>
 
-      <!-- Change username -->
       <div id="namePanel" style="display:none;">
         <div class="modal-header">
-          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <button class="modal-close" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
           <span class="modal-title">Change Username</span>
-          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div id="nameAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="form-stack">
@@ -182,12 +296,11 @@
         </div>
       </div>
 
-      <!-- Change email -->
       <div id="emailPanel" style="display:none;">
         <div class="modal-header">
-          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <button class="modal-close" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
           <span class="modal-title">Change Email</span>
-          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div id="emailAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="form-stack">
@@ -196,23 +309,33 @@
         </div>
       </div>
 
-      <!-- Delete account -->
+      <div id="passwordPanel" style="display:none;">
+        <div class="modal-header">
+          <button class="modal-close" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <span class="modal-title">Change Password</span>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div id="passwordAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group"><label>New password</label><input type="password" id="newPassword" placeholder="Enter new password"/></div>
+          <div class="form-group"><label>Confirm new password</label><input type="password" id="newPassword2" placeholder="Repeat new password"/></div>
+          <button class="btn btn-primary" id="passwordBtn">Update Password</button>
+        </div>
+      </div>
+
       <div id="deletePanel" style="display:none;">
         <div class="modal-header">
-          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <button class="modal-close" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
           <span class="modal-title" style="color:var(--danger);">Delete Account</span>
-          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
-        <div style="background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);border-radius:var(--radius-sm);padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.86rem;color:#fb7185;line-height:1.5;">
-          ⚠️ This will permanently delete your account and <strong>all your files</strong>. This action cannot be undone.
-        </div>
+        <div style="background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);border-radius:var(--radius-sm);padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.86rem;color:#fb7185;line-height:1.5;">⚠️ This will permanently delete your account and <strong>all your files</strong>. This cannot be undone.</div>
         <div id="deleteAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="form-stack">
           <div class="form-group"><label>Type DELETE to confirm</label><input type="text" id="deleteConfirm" placeholder="DELETE"/></div>
           <button class="btn" id="deleteBtn" style="background:var(--danger);color:#fff;width:100%;box-shadow:0 4px 18px rgba(244,63,94,0.35);">Delete My Account</button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -224,9 +347,14 @@
     if (user) {
       document.getElementById("userName").textContent = user.name;
       document.getElementById("userAvatar").textContent = user.name[0].toUpperCase();
+      if (user.is_admin) document.getElementById("nav-admin").style.display = "flex";
     }
 
+    let currentParentId = null;
+    let breadcrumbs = [{id: null, name: "My Drive"}];
     let verifiedPassword = "";
+    let currentShareFileId = null;
+    let searchTimeout = null;
 
     function switchTab(name, el) {
       document.getElementById("tab-files").style.display = name === "files" ? "block" : "none";
@@ -236,37 +364,126 @@
       el.classList.add("active");
     }
 
-    async function loadFiles() {
-      const res = await apiFetch("/api/file/list");
+    function handleSearch() {
+      clearTimeout(searchTimeout);
+      const q = document.getElementById("searchInput").value.trim();
+      if (q) {
+        searchTimeout = setTimeout(() => searchFiles(q), 350);
+      } else {
+        loadFiles();
+      }
+    }
+
+    async function searchFiles(q) {
+      const res = await apiFetch(`/api/file/search?q=${encodeURIComponent(q)}`);
       if (!res) return;
       const files = await res.json();
-      document.getElementById("navCount").textContent = files.length;
-      document.getElementById("statFiles").textContent = files.length;
-      const totalBytes = files.reduce((a, f) => a + (f.file_size || 0), 0);
+      renderFileList(files);
+    }
+
+    function sortFiles(files) {
+      const sort = document.getElementById("sortSelect").value;
+      return [...files].sort((a, b) => {
+        if (sort === "date-desc") return new Date(b.create_date) - new Date(a.create_date);
+        if (sort === "date-asc") return new Date(a.create_date) - new Date(b.create_date);
+        if (sort === "name-asc") return a.file_name.localeCompare(b.file_name);
+        if (sort === "name-desc") return b.file_name.localeCompare(a.file_name);
+        if (sort === "size-desc") return b.file_size - a.file_size;
+        if (sort === "size-asc") return a.file_size - b.file_size;
+        return 0;
+      });
+    }
+
+    function renderBreadcrumb() {
+      const bc = document.getElementById("breadcrumb");
+      bc.innerHTML = breadcrumbs.map((item, i) => {
+        const isLast = i === breadcrumbs.length - 1;
+        return `${i > 0 ? '<span class="breadcrumb-sep">›</span>' : ''}
+          <span class="breadcrumb-item ${isLast ? 'active' : ''}" onclick="${isLast ? '' : `navigateTo(${item.id === null ? 'null' : item.id}, ${i})`}">${item.name}</span>`;
+      }).join("");
+    }
+
+    function navigateTo(id, index) {
+      currentParentId = id;
+      breadcrumbs = breadcrumbs.slice(0, index + 1);
+      renderBreadcrumb();
+      loadFiles();
+    }
+
+    async function loadFiles() {
+      const param = currentParentId !== null ? `?parent_id=${currentParentId}` : "";
+      const res = await apiFetch(`/api/file/list${param}`);
+      if (!res) return;
+      const files = await res.json();
+
+      const allFiles = files.filter(f => !f.is_folder);
+      document.getElementById("navCount").textContent = allFiles.length;
+      document.getElementById("statFiles").textContent = allFiles.length;
+      const totalBytes = allFiles.reduce((a, f) => a + (f.file_size || 0), 0);
       const sizeStr = formatSize(totalBytes);
       const parts = sizeStr.match(/^([\d.]+)\s*(.+)$/);
       document.getElementById("statSize").innerHTML = parts ? `${parts[1]} <span class="unit">${parts[2]}</span>` : sizeStr;
+
+      renderBreadcrumb();
+      renderFileList(sortFiles(files));
+    }
+
+    function renderFileList(files) {
       const list = document.getElementById("fileList");
       if (!files.length) {
-        list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>No files yet</h3><p>Upload something to get started</p></div>`;
+        list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>This folder is empty</h3><p>Upload files or create a new folder</p></div>`;
         return;
       }
-      list.innerHTML = files.map((f, i) => `
-        <div class="file-card" style="animation-delay:${i*0.04}s">
+
+      const folders = files.filter(f => f.is_folder);
+      const fileItems = files.filter(f => !f.is_folder);
+      const sorted = [...folders, ...fileItems];
+
+      list.innerHTML = sorted.map((f, i) => {
+        if (f.is_folder) {
+          return `<div class="file-card folder-card" style="animation-delay:${i*0.04}s;cursor:pointer;" onclick="enterFolder(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
+            <div class="file-thumb">📁</div>
+            <div class="file-info">
+              <div class="file-name">${f.file_name}</div>
+              <div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div>
+            </div>
+            <div class="file-actions" onclick="event.stopPropagation()">
+              <button class="btn-icon danger" title="Delete" onclick="deleteItem(${f.id})">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              </button>
+            </div>
+          </div>`;
+        }
+        const previewable = ["image/jpeg","image/png","image/gif","image/webp","image/svg+xml","application/pdf","text/plain"].includes(f.file_type);
+        return `<div class="file-card" style="animation-delay:${i*0.04}s">
           <div class="file-thumb">${fileEmoji(f.file_type)}</div>
           <div class="file-info">
             <div class="file-name">${f.file_name}</div>
             <div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div>
           </div>
           <div class="file-actions">
-            <button class="btn-icon" title="Download" onclick="downloadFile(${f.id},'${f.file_name}')">
+            ${previewable ? `<button class="btn-icon" title="Preview" onclick="previewFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}',${f.file_size})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>` : ""}
+            <button class="btn-icon action-share" title="Share" onclick="openShare(${f.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+            <button class="btn-icon" title="Download" onclick="downloadFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
-            <button class="btn-icon danger" title="Delete" onclick="deleteFile(${f.id})">
+            <button class="btn-icon danger" title="Delete" onclick="deleteItem(${f.id})">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
           </div>
-        </div>`).join("");
+        </div>`;
+      }).join("");
+    }
+
+    function enterFolder(id, name) {
+      currentParentId = id;
+      breadcrumbs.push({id, name});
+      renderBreadcrumb();
+      loadFiles();
     }
 
     async function downloadFile(id, name) {
@@ -277,8 +494,95 @@
       a.download = name; a.click(); URL.revokeObjectURL(a.href);
     }
 
-    async function deleteFile(id) {
-      if (!confirm("Permanently delete this file?")) return;
+    async function previewFile(id, name, size) {
+      document.getElementById("previewTitle").textContent = name;
+      document.getElementById("previewContent").innerHTML = `<div style="color:var(--text3);padding:2rem;">Loading...</div>`;
+      document.getElementById("previewDownloadBtn").onclick = () => downloadFile(id, name);
+      document.getElementById("previewOverlay").classList.add("open");
+
+      const res = await fetch(`${API}/api/file/preview/${id}`, { headers: { Authorization: `Bearer ${auth.getToken()}` } });
+      if (!res.ok) { document.getElementById("previewContent").innerHTML = `<div style="color:var(--danger);padding:2rem;">Preview not available.</div>`; return; }
+
+      const contentType = res.headers.get("content-type") || "";
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const content = document.getElementById("previewContent");
+
+      if (contentType.startsWith("image/")) {
+        content.innerHTML = `<img src="${url}" alt="${name}"/>`;
+      } else if (contentType === "application/pdf") {
+        content.innerHTML = `<iframe src="${url}"></iframe>`;
+      } else if (contentType.startsWith("text/")) {
+        const text = await blob.text();
+        content.innerHTML = `<pre>${text.replace(/</g,"&lt;")}</pre>`;
+      } else {
+        content.innerHTML = `<div style="color:var(--text3);padding:2rem;">Cannot preview this file type.</div>`;
+      }
+    }
+
+    function openShare(fileId) {
+      currentShareFileId = fileId;
+      document.getElementById("shareResult").style.display = "none";
+      document.getElementById("shareUrl").value = "";
+      hideAlert(document.getElementById("shareAlert"));
+      document.getElementById("shareOverlay").classList.add("open");
+    }
+
+    async function generateShareLink() {
+      const expireHours = parseInt(document.getElementById("shareExpiry").value);
+      const btn = document.getElementById("shareBtn");
+      btn.textContent = "Generating..."; btn.disabled = true;
+      hideAlert(document.getElementById("shareAlert"));
+
+      const res = await apiFetch("/api/file/share", {
+        method: "POST",
+        body: JSON.stringify({ file_id: currentShareFileId, expire_hours: expireHours })
+      });
+      const d = await res.json();
+
+      if (res.ok) {
+        const fullUrl = `${window.location.origin}${d.url}`;
+        document.getElementById("shareUrl").value = fullUrl;
+        document.getElementById("shareExpireInfo").textContent = `Expires: ${new Date(d.expire_at).toLocaleString()}`;
+        document.getElementById("shareResult").style.display = "block";
+      } else {
+        showAlert(document.getElementById("shareAlert"), d.detail || "Failed to generate link.");
+      }
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Generate Link`;
+      btn.disabled = false;
+    }
+
+    function copyShareUrl() {
+      navigator.clipboard.writeText(document.getElementById("shareUrl").value);
+      const btn = document.querySelector(".copy-btn");
+      btn.textContent = "Copied!"; setTimeout(() => btn.textContent = "Copy", 2000);
+    }
+
+    document.getElementById("shareBtn").addEventListener("click", generateShareLink);
+
+    function openNewFolder() {
+      document.getElementById("folderName").value = "";
+      hideAlert(document.getElementById("folderAlert"));
+      document.getElementById("folderOverlay").classList.add("open");
+      setTimeout(() => document.getElementById("folderName").focus(), 100);
+    }
+
+    document.getElementById("folderBtn").addEventListener("click", async () => {
+      const name = document.getElementById("folderName").value.trim();
+      const a = document.getElementById("folderAlert");
+      if (!name) { showAlert(a, "Please enter a folder name."); return; }
+      const btn = document.getElementById("folderBtn");
+      btn.textContent = "Creating..."; btn.disabled = true; hideAlert(a);
+      const body = { folder_name: name };
+      if (currentParentId !== null) body.parent_id = currentParentId;
+      const res = await apiFetch("/api/file/folder", { method: "POST", body: JSON.stringify(body) });
+      if (res?.ok) { closeModal("folderOverlay"); loadFiles(); }
+      else { const d = await res.json(); showAlert(a, d.detail || "Failed to create folder."); }
+      btn.textContent = "Create Folder"; btn.disabled = false;
+    });
+
+    async function deleteItem(id) {
+      if (!confirm("Delete this item? This cannot be undone.")) return;
       const res = await apiFetch(`/api/file/delete/${id}`, { method: "DELETE" });
       if (res?.ok) loadFiles();
       else showAlert(document.getElementById("globalAlert"), "Delete failed.");
@@ -300,8 +604,7 @@
       const queue = document.getElementById("uploadQueue");
       hideAlert(alertEl); progressWrap.classList.add("show"); queue.innerHTML = "";
       [...files].forEach(f => {
-        const el = document.createElement("div");
-        el.className = "queue-item";
+        const el = document.createElement("div"); el.className = "queue-item";
         el.innerHTML = `<span style="font-size:1.2rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span><span style="color:var(--text3);font-size:0.76rem">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`;
         queue.appendChild(el);
       });
@@ -311,7 +614,8 @@
         const s = document.getElementById(sid);
         if (s) { s.textContent = "Uploading..."; s.className = "q-status q-wait"; }
         const form = new FormData(); form.append("file", f);
-        const res = await apiFetch("/api/file/upload", { method: "POST", body: form });
+        const url = currentParentId !== null ? `/api/file/upload?parent_id=${currentParentId}` : "/api/file/upload";
+        const res = await apiFetch(url, { method: "POST", body: form });
         done++; progressFill.style.width = `${(done/files.length)*100}%`;
         if (s) { if (res?.ok) { s.textContent = "✓ Done"; s.className = "q-status q-ok"; } else { s.textContent = "✗ Failed"; s.className = "q-status q-err"; } }
       }
@@ -319,6 +623,9 @@
       setTimeout(() => { progressWrap.classList.remove("show"); progressFill.style.width = "0%"; }, 2000);
       fileInput.value = ""; loadFiles();
     }
+
+    function handleOverlayClick(e, id) { if (e.target.id === id) closeModal(id); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
     function openSettings() {
       verifiedPassword = "";
@@ -331,16 +638,8 @@
       setTimeout(() => document.getElementById("gatePassword").focus(), 100);
     }
 
-    function closeSettings() {
-      document.getElementById("settingsOverlay").classList.remove("open");
-    }
-
-    function handleOverlayClick(e) {
-      if (e.target === document.getElementById("settingsOverlay")) closeSettings();
-    }
-
     function showSubPanel(name) {
-      ["namePanel","emailPanel","deletePanel"].forEach(p => document.getElementById(p).style.display = "none");
+      ["namePanel","emailPanel","passwordPanel","deletePanel"].forEach(p => document.getElementById(p).style.display = "none");
       document.getElementById("settingsPanel").style.display = name ? "none" : "block";
       if (name) document.getElementById(name).style.display = "block";
     }
@@ -352,28 +651,22 @@
       const btn = document.getElementById("gateBtn");
       btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/verify", { method: "POST", body: JSON.stringify({password: pw}) });
-      if (res?.ok) {
-        verifiedPassword = pw;
-        document.getElementById("gatePanel").style.display = "none";
-        document.getElementById("settingsPanel").style.display = "block";
-      } else {
-        const d = await res.json();
-        showAlert(a, d.detail || "Incorrect password.");
-      }
+      if (res?.ok) { verifiedPassword = pw; document.getElementById("gatePanel").style.display = "none"; document.getElementById("settingsPanel").style.display = "block"; }
+      else { const d = await res.json(); showAlert(a, d.detail || "Incorrect password."); }
       btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Unlock Settings`;
       btn.disabled = false;
     });
+    document.getElementById("gatePassword").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("gateBtn").click(); });
 
     document.getElementById("nameBtn").addEventListener("click", async () => {
       const newName = document.getElementById("newName").value.trim();
       const a = document.getElementById("nameAlert");
       if (!newName) { showAlert(a, "Please enter a new username."); return; }
-      const btn = document.getElementById("nameBtn");
-      btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
+      const btn = document.getElementById("nameBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/name", { method: "PATCH", body: JSON.stringify({new_name: newName, password: verifiedPassword}) });
       const d = await res.json();
       if (res.ok) {
-        auth.setUser({name: newName});
+        auth.setUser({...user, name: newName});
         if (d.access_token) auth.setToken(d.access_token);
         document.getElementById("userName").textContent = newName;
         document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
@@ -387,8 +680,7 @@
       const newEmail = document.getElementById("newEmail").value.trim();
       const a = document.getElementById("emailAlert");
       if (!newEmail) { showAlert(a, "Please enter a new email."); return; }
-      const btn = document.getElementById("emailBtn");
-      btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
+      const btn = document.getElementById("emailBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) });
       const d = await res.json();
       if (res.ok) { showAlert(a, "Email updated successfully!", "success"); document.getElementById("newEmail").value = ""; }
@@ -396,21 +688,38 @@
       btn.textContent = "Update Email"; btn.disabled = false;
     });
 
+    document.getElementById("passwordBtn").addEventListener("click", async () => {
+      const newPassword = document.getElementById("newPassword").value;
+      const newPassword2 = document.getElementById("newPassword2").value;
+      const a = document.getElementById("passwordAlert");
+      if (!newPassword || !newPassword2) { showAlert(a, "Please fill in all fields."); return; }
+      if (newPassword !== newPassword2) { showAlert(a, "Passwords do not match."); return; }
+      if (newPassword.length < 6) { showAlert(a, "Password must be at least 6 characters."); return; }
+      const btn = document.getElementById("passwordBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
+      const res = await apiFetch("/api/user/settings/password", { method: "PATCH", body: JSON.stringify({current_password: verifiedPassword, new_password: newPassword, new_password2: newPassword2}) });
+      const d = await res.json();
+      if (res.ok) {
+        verifiedPassword = newPassword;
+        showAlert(a, "Password updated successfully!", "success");
+        document.getElementById("newPassword").value = "";
+        document.getElementById("newPassword2").value = "";
+      } else { showAlert(a, d.detail || "Failed to update password."); }
+      btn.textContent = "Update Password"; btn.disabled = false;
+    });
+
     document.getElementById("deleteBtn").addEventListener("click", async () => {
-      const confirm_text = document.getElementById("deleteConfirm").value;
+      const confirmText = document.getElementById("deleteConfirm").value;
       const a = document.getElementById("deleteAlert");
-      if (confirm_text !== "DELETE") { showAlert(a, 'Type DELETE (all caps) to confirm.'); return; }
-      const btn = document.getElementById("deleteBtn");
-      btn.textContent = "Deleting..."; btn.disabled = true; hideAlert(a);
+      if (confirmText !== "DELETE") { showAlert(a, "Type DELETE (all caps) to confirm."); return; }
+      const btn = document.getElementById("deleteBtn"); btn.textContent = "Deleting..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/delete", { method: "DELETE", body: JSON.stringify({password: verifiedPassword}) });
       if (res?.ok) { auth.logout(); }
       else { const d = await res.json(); showAlert(a, d.detail || "Failed to delete account."); btn.textContent = "Delete My Account"; btn.disabled = false; }
     });
 
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { ["previewOverlay","shareOverlay","folderOverlay","settingsOverlay"].forEach(closeModal); } });
 
     loadFiles();
   </script>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
 </html>
