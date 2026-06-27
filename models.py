@@ -10,6 +10,7 @@ class Users(Base):
     name = Column(String, nullable=False, unique=True)
     passwd = Column(String, nullable=False)
     email = Column(String, unique=True)
+    storage_path = Column(String, nullable=True)
 
 
 class Files(Base):
