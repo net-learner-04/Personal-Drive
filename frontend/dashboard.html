@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Personal-Drive</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .modal-overlay { position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s ease; }
+    .modal-overlay.open { opacity:1;pointer-events:all; }
+    .modal { width:100%;max-width:420px;padding:2rem;animation:modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes modal-in { from{opacity:0;transform:scale(0.94) translateY(16px)} to{opacity:1;transform:none} }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem; }
+    .modal-title { font-size:1.15rem;font-weight:800;letter-spacing:-0.4px; }
+    .modal-close { background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center; }
+    .modal-close:hover { color:var(--text);background:var(--surface2); }
+
+    .settings-list { display:flex;flex-direction:column;gap:0.5rem;margin-top:0.25rem; }
+    .settings-item { display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t); }
+    .settings-item:hover { background:var(--glass-h);border-color:rgba(99,102,241,0.3);transform:translateX(3px); }
+    .settings-item.danger:hover { border-color:rgba(244,63,94,0.35);background:rgba(244,63,94,0.06); }
+    .settings-icon { width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+    .settings-icon.blue { background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc; }
+    .settings-icon.red { background:rgba(244,63,94,0.12);color:var(--danger); }
+    .settings-label { font-size:0.9rem;font-weight:600; }
+    .settings-sub { font-size:0.76rem;color:var(--text3);margin-top:0.1rem; }
+
+    .user-row-clickable { cursor:pointer;transition:all var(--t); }
+    .user-row-clickable:hover { background:var(--surface2); }
+
+    .input-with-btn { display:flex;gap:0.5rem; }
+    .input-with-btn input { flex:1; }
+  </style>
+</head>
+<body>
+  <div class="bg-canvas"><div class="bg-orb"></div><div class="bg-orb"></div><div class="bg-orb"></div></div>
+
+  <div class="dash-layout page">
+    <aside class="sidebar">
+      <div class="sidebar-glow"></div>
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15a4 4 0 0 0 4 4h9a5 5 0 1 0-.23-9.99A5 5 0 0 0 3 15z"/></svg>
+        </div>
+        <span>Personal-Drive</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="sidebar-section">Storage</div>
+        <div class="nav-item active" id="nav-files" onclick="switchTab('files',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          My Files
+          <span class="nav-badge" id="navCount">0</span>
+        </div>
+        <div class="nav-item" id="nav-upload" onclick="switchTab('upload',this)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          Upload
+        </div>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="user-row user-row-clickable" onclick="openSettings()" title="Account settings">
+          <div class="avatar" id="userAvatar">?</div>
+          <div class="user-meta">
+            <div class="user-name-el" id="userName">Loading...</div>
+            <div class="user-sub">Click to manage account</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);flex-shrink:0;"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="width:100%;gap:0.5rem;" onclick="auth.logout()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar-dash">
+        <span class="topbar-title" id="pageTitle">My Files</span>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" onclick="loadFiles()" style="gap:0.45rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+          <button class="theme-toggle"></button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="stats-grid">
+          <div class="glass stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="stat-label">Total Files</div>
+            <div class="stat-val" id="statFiles">0</div>
+          </div>
+          <div class="glass stat-card">
+            <div class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div>
+            <div class="stat-label">Storage Used</div>
+            <div class="stat-val" id="statSize">0 <span class="unit">B</span></div>
+          </div>
+        </div>
+
+        <div id="globalAlert" class="alert" style="margin-bottom:1.25rem;"></div>
+
+        <div id="tab-files">
+          <div class="section-hdr"><span class="section-title">All Files</span></div>
+          <div id="fileList" class="file-list"></div>
+        </div>
+
+        <div id="tab-upload" style="display:none;">
+          <div id="uploadAlert" class="alert" style="margin-bottom:1.25rem;"></div>
+          <div class="section-hdr"><span class="section-title">Upload Files</span></div>
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            </div>
+            <h3>Drop files here</h3>
+            <p>or <span class="browse">browse your computer</span></p>
+            <p style="margin-top:0.4rem;font-size:0.76rem;">Any file type · No size limit</p>
+            <input type="file" id="fileInput" multiple style="display:none;"/>
+          </div>
+          <div class="progress-wrap" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
+          <div id="uploadQueue" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsOverlay" onclick="handleOverlayClick(event)">
+    <div class="glass modal" id="settingsModal">
+
+      <!-- Gate: password verify -->
+      <div id="gatePanel">
+        <div class="modal-header">
+          <span class="modal-title">Confirm Identity</span>
+          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1.25rem;">Enter your password to access account settings.</p>
+        <div id="gateAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group"><label>Password</label><input type="password" id="gatePassword" placeholder="Enter your password"/></div>
+          <button class="btn btn-primary" id="gateBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Unlock Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Settings menu -->
+      <div id="settingsPanel" style="display:none;">
+        <div class="modal-header">
+          <span class="modal-title">Account Settings</span>
+          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div id="settingsAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="showSubPanel('namePanel')">
+            <div class="settings-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div><div class="settings-label">Change Username</div><div class="settings-sub">Update your display name</div></div>
+          </div>
+          <div class="settings-item" onclick="showSubPanel('emailPanel')">
+            <div class="settings-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div><div class="settings-label">Change Email</div><div class="settings-sub">Update your email address</div></div>
+          </div>
+          <div class="settings-item danger" onclick="showSubPanel('deletePanel')">
+            <div class="settings-icon red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
+            <div><div class="settings-label" style="color:var(--danger);">Delete Account</div><div class="settings-sub">Permanently remove your account and all files</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change username -->
+      <div id="namePanel" style="display:none;">
+        <div class="modal-header">
+          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <span class="modal-title">Change Username</span>
+          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div id="nameAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group"><label>New username</label><input type="text" id="newName" placeholder="Enter new username"/></div>
+          <button class="btn btn-primary" id="nameBtn">Update Username</button>
+        </div>
+      </div>
+
+      <!-- Change email -->
+      <div id="emailPanel" style="display:none;">
+        <div class="modal-header">
+          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <span class="modal-title">Change Email</span>
+          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div id="emailAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group"><label>New email address</label><input type="email" id="newEmail" placeholder="your@email.com"/></div>
+          <button class="btn btn-primary" id="emailBtn">Update Email</button>
+        </div>
+      </div>
+
+      <!-- Delete account -->
+      <div id="deletePanel" style="display:none;">
+        <div class="modal-header">
+          <button class="modal-close" onclick="showSubPanel(null)" style="margin-right:0.5rem;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
+          <span class="modal-title" style="color:var(--danger);">Delete Account</span>
+          <button class="modal-close" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div style="background:rgba(244,63,94,0.08);border:1px solid rgba(244,63,94,0.2);border-radius:var(--radius-sm);padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.86rem;color:#fb7185;line-height:1.5;">
+          ⚠️ This will permanently delete your account and <strong>all your files</strong>. This action cannot be undone.
+        </div>
+        <div id="deleteAlert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group"><label>Type DELETE to confirm</label><input type="text" id="deleteConfirm" placeholder="DELETE"/></div>
+          <button class="btn" id="deleteBtn" style="background:var(--danger);color:#fff;width:100%;box-shadow:0 4px 18px rgba(244,63,94,0.35);">Delete My Account</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    if (!auth.require()) throw new Error("Unauthorized");
+
+    const user = auth.getUser();
+    if (user) {
+      document.getElementById("userName").textContent = user.name;
+      document.getElementById("userAvatar").textContent = user.name[0].toUpperCase();
+    }
+
+    let verifiedPassword = "";
+
+    function switchTab(name, el) {
+      document.getElementById("tab-files").style.display = name === "files" ? "block" : "none";
+      document.getElementById("tab-upload").style.display = name === "upload" ? "block" : "none";
+      document.getElementById("pageTitle").textContent = name === "files" ? "My Files" : "Upload Files";
+      document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+      el.classList.add("active");
+    }
+
+    async function loadFiles() {
+      const res = await apiFetch("/api/file/list");
+      if (!res) return;
+      const files = await res.json();
+      document.getElementById("navCount").textContent = files.length;
+      document.getElementById("statFiles").textContent = files.length;
+      const totalBytes = files.reduce((a, f) => a + (f.file_size || 0), 0);
+      const sizeStr = formatSize(totalBytes);
+      const parts = sizeStr.match(/^([\d.]+)\s*(.+)$/);
+      document.getElementById("statSize").innerHTML = parts ? `${parts[1]} <span class="unit">${parts[2]}</span>` : sizeStr;
+      const list = document.getElementById("fileList");
+      if (!files.length) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>No files yet</h3><p>Upload something to get started</p></div>`;
+        return;
+      }
+      list.innerHTML = files.map((f, i) => `
+        <div class="file-card" style="animation-delay:${i*0.04}s">
+          <div class="file-thumb">${fileEmoji(f.file_type)}</div>
+          <div class="file-info">
+            <div class="file-name">${f.file_name}</div>
+            <div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div>
+          </div>
+          <div class="file-actions">
+            <button class="btn-icon" title="Download" onclick="downloadFile(${f.id},'${f.file_name}')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button class="btn-icon danger" title="Delete" onclick="deleteFile(${f.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>`).join("");
+    }
+
+    async function downloadFile(id, name) {
+      const res = await fetch(`${API}/api/file/download/${id}`, { headers: { Authorization: `Bearer ${auth.getToken()}` } });
+      if (!res.ok) { showAlert(document.getElementById("globalAlert"), "Download failed."); return; }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(await res.blob());
+      a.download = name; a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    async function deleteFile(id) {
+      if (!confirm("Permanently delete this file?")) return;
+      const res = await apiFetch(`/api/file/delete/${id}`, { method: "DELETE" });
+      if (res?.ok) loadFiles();
+      else showAlert(document.getElementById("globalAlert"), "Delete failed.");
+    }
+
+    const uploadZone = document.getElementById("uploadZone");
+    const fileInput = document.getElementById("fileInput");
+    uploadZone.addEventListener("click", () => fileInput.click());
+    uploadZone.addEventListener("dragover", e => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
+    uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
+    uploadZone.addEventListener("drop", e => { e.preventDefault(); uploadZone.classList.remove("drag-over"); uploadFiles(e.dataTransfer.files); });
+    fileInput.addEventListener("change", () => uploadFiles(fileInput.files));
+
+    async function uploadFiles(files) {
+      if (!files.length) return;
+      const alertEl = document.getElementById("uploadAlert");
+      const progressWrap = document.getElementById("progressWrap");
+      const progressFill = document.getElementById("progressFill");
+      const queue = document.getElementById("uploadQueue");
+      hideAlert(alertEl); progressWrap.classList.add("show"); queue.innerHTML = "";
+      [...files].forEach(f => {
+        const el = document.createElement("div");
+        el.className = "queue-item";
+        el.innerHTML = `<span style="font-size:1.2rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span><span style="color:var(--text3);font-size:0.76rem">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`;
+        queue.appendChild(el);
+      });
+      let done = 0;
+      for (const f of files) {
+        const sid = `qs-${f.name.replace(/\W/g,'_')}`;
+        const s = document.getElementById(sid);
+        if (s) { s.textContent = "Uploading..."; s.className = "q-status q-wait"; }
+        const form = new FormData(); form.append("file", f);
+        const res = await apiFetch("/api/file/upload", { method: "POST", body: form });
+        done++; progressFill.style.width = `${(done/files.length)*100}%`;
+        if (s) { if (res?.ok) { s.textContent = "✓ Done"; s.className = "q-status q-ok"; } else { s.textContent = "✗ Failed"; s.className = "q-status q-err"; } }
+      }
+      showAlert(alertEl, `${done} of ${files.length} file(s) uploaded.`, done===files.length?"success":"error");
+      setTimeout(() => { progressWrap.classList.remove("show"); progressFill.style.width = "0%"; }, 2000);
+      fileInput.value = ""; loadFiles();
+    }
+
+    function openSettings() {
+      verifiedPassword = "";
+      document.getElementById("gatePassword").value = "";
+      document.getElementById("gatePanel").style.display = "block";
+      document.getElementById("settingsPanel").style.display = "none";
+      hideAlert(document.getElementById("gateAlert"));
+      showSubPanel(null);
+      document.getElementById("settingsOverlay").classList.add("open");
+      setTimeout(() => document.getElementById("gatePassword").focus(), 100);
+    }
+
+    function closeSettings() {
+      document.getElementById("settingsOverlay").classList.remove("open");
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById("settingsOverlay")) closeSettings();
+    }
+
+    function showSubPanel(name) {
+      ["namePanel","emailPanel","deletePanel"].forEach(p => document.getElementById(p).style.display = "none");
+      document.getElementById("settingsPanel").style.display = name ? "none" : "block";
+      if (name) document.getElementById(name).style.display = "block";
+    }
+
+    document.getElementById("gateBtn").addEventListener("click", async () => {
+      const pw = document.getElementById("gatePassword").value;
+      const a = document.getElementById("gateAlert");
+      if (!pw) { showAlert(a, "Please enter your password."); return; }
+      const btn = document.getElementById("gateBtn");
+      btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
+      const res = await apiFetch("/api/user/settings/verify", { method: "POST", body: JSON.stringify({password: pw}) });
+      if (res?.ok) {
+        verifiedPassword = pw;
+        document.getElementById("gatePanel").style.display = "none";
+        document.getElementById("settingsPanel").style.display = "block";
+      } else {
+        const d = await res.json();
+        showAlert(a, d.detail || "Incorrect password.");
+      }
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Unlock Settings`;
+      btn.disabled = false;
+    });
+
+    document.getElementById("nameBtn").addEventListener("click", async () => {
+      const newName = document.getElementById("newName").value.trim();
+      const a = document.getElementById("nameAlert");
+      if (!newName) { showAlert(a, "Please enter a new username."); return; }
+      const btn = document.getElementById("nameBtn");
+      btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
+      const res = await apiFetch("/api/user/settings/name", { method: "PATCH", body: JSON.stringify({new_name: newName, password: verifiedPassword}) });
+      const d = await res.json();
+      if (res.ok) {
+        auth.setUser({name: newName});
+        if (d.access_token) auth.setToken(d.access_token);
+        document.getElementById("userName").textContent = newName;
+        document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
+        showAlert(a, "Username updated successfully!", "success");
+        document.getElementById("newName").value = "";
+      } else { showAlert(a, d.detail || "Failed to update username."); }
+      btn.textContent = "Update Username"; btn.disabled = false;
+    });
+
+    document.getElementById("emailBtn").addEventListener("click", async () => {
+      const newEmail = document.getElementById("newEmail").value.trim();
+      const a = document.getElementById("emailAlert");
+      if (!newEmail) { showAlert(a, "Please enter a new email."); return; }
+      const btn = document.getElementById("emailBtn");
+      btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
+      const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) });
+      const d = await res.json();
+      if (res.ok) { showAlert(a, "Email updated successfully!", "success"); document.getElementById("newEmail").value = ""; }
+      else { showAlert(a, d.detail || "Failed to update email."); }
+      btn.textContent = "Update Email"; btn.disabled = false;
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", async () => {
+      const confirm_text = document.getElementById("deleteConfirm").value;
+      const a = document.getElementById("deleteAlert");
+      if (confirm_text !== "DELETE") { showAlert(a, 'Type DELETE (all caps) to confirm.'); return; }
+      const btn = document.getElementById("deleteBtn");
+      btn.textContent = "Deleting..."; btn.disabled = true; hideAlert(a);
+      const res = await apiFetch("/api/user/settings/delete", { method: "DELETE", body: JSON.stringify({password: verifiedPassword}) });
+      if (res?.ok) { auth.logout(); }
+      else { const d = await res.json(); showAlert(a, d.detail || "Failed to delete account."); btn.textContent = "Delete My Account"; btn.disabled = false; }
+    });
+
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeSettings(); });
+
+    loadFiles();
+  </script>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</body>
+</html>

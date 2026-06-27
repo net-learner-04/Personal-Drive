@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal-Drive — Your Private Cloud</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8rem 2rem 4rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.22); border-radius: 99px; color: #a5b4fc; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.05em; padding: 0.35rem 0.95rem; margin-bottom: 2rem; animation: fade-up 0.5s ease both; }
+    .badge-dot { width: 6px; height: 6px; background: #a5b4fc; border-radius: 50%; animation: dot-pulse 2s ease-in-out infinite; }
+    @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+    .hero-logo { display: flex; align-items: center; justify-content: center; gap: 0.85rem; margin-bottom: 1.75rem; animation: fade-up 0.5s 0.08s ease both; }
+    .hero-logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 48px rgba(99,102,241,0.45); }
+    .hero-logo span { font-size: 2.1rem; font-weight: 800; letter-spacing: -1px; }
+    .hero-title { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -2px; line-height: 1.05; margin-bottom: 1.2rem; animation: fade-up 0.5s 0.16s ease both; }
+    .grad { background: linear-gradient(135deg, #a5b4fc, #8b5cf6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-sub { color: var(--text2); font-size: 1.05rem; max-width: 460px; line-height: 1.65; margin-bottom: 2.5rem; animation: fade-up 0.5s 0.22s ease both; }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; animation: fade-up 0.5s 0.3s ease both; }
+    .btn-hero { align-items: center; border-radius: 12px; cursor: pointer; display: inline-flex; font-family: inherit; font-size: 0.98rem; font-weight: 700; gap: 0.5rem; padding: 0.9rem 2rem; transition: all 0.25s ease; text-decoration: none; border: none; }
+    .btn-hero-p { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; box-shadow: 0 4px 24px rgba(99,102,241,0.42); }
+    .btn-hero-p:hover { transform: translateY(-3px); box-shadow: 0 8px 36px rgba(99,102,241,0.55); color: #fff; }
+    .btn-hero-s { background: var(--glass); backdrop-filter: blur(14px); border: 1px solid var(--glass-b); color: var(--text); }
+    .btn-hero-s:hover { border-color: rgba(99,102,241,0.45); background: rgba(99,102,241,0.07); transform: translateY(-3px); color: var(--text); }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 1rem; max-width: 700px; width: 100%; margin-top: 4.5rem; animation: fade-up 0.5s 0.4s ease both; }
+    .feat { background: var(--glass); backdrop-filter: blur(14px); border: 1px solid var(--glass-b); border-radius: 14px; padding: 1.5rem; text-align: left; transition: all 0.25s ease; }
+    .feat:hover { border-color: rgba(99,102,241,0.28); background: var(--glass-h); transform: translateY(-5px); box-shadow: 0 8px 24px rgba(99,102,241,0.1); }
+    .feat-icon { width: 42px; height: 42px; background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.18)); border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 1.25rem; }
+    .feat-title { font-size: 0.92rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .feat-desc { color: var(--text2); font-size: 0.8rem; line-height: 1.55; }
+    .scroll-hint { margin-top: 4rem; color: var(--text3); font-size: 0.76rem; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; animation: fade-up 0.5s 0.6s ease both; }
+    .bounce { animation: bounce 2.2s ease-in-out infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(7px)} }
+    @keyframes fade-up { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:none} }
+  </style>
+</head>
+<body>
+  <div class="bg-canvas"><div class="bg-orb"></div><div class="bg-orb"></div><div class="bg-orb"></div></div>
+
+  <nav class="topbar-global">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15a4 4 0 0 0 4 4h9a5 5 0 1 0-.23-9.99A5 5 0 0 0 3 15z"/></svg>
+      </div>
+      Personal-Drive
+    </a>
+    <div class="nav-right">
+      <button class="theme-toggle"></button>
+      <a href="register.html" class="btn-nav-ghost">Register</a>
+      <a href="login.html" class="btn-nav">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign in
+      </a>
+    </div>
+  </nav>
+
+  <main class="hero page">
+    <div class="badge"><span class="badge-dot"></span>Private · Secure · Self-hosted</div>
+
+    <div class="hero-logo">
+      <div class="hero-logo-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15a4 4 0 0 0 4 4h9a5 5 0 1 0-.23-9.99A5 5 0 0 0 3 15z"/></svg>
+      </div>
+      <span>Personal-Drive</span>
+    </div>
+
+    <h1 class="hero-title">Your files.<br/><span class="grad">Your server.</span></h1>
+    <p class="hero-sub">A private cloud storage server — upload, manage, and access your files securely from anywhere.</p>
+
+    <div class="hero-actions">
+      <a href="login.html" class="btn-hero btn-hero-p">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign in
+      </a>
+      <a href="register.html" class="btn-hero btn-hero-s">
+        Create account
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <div class="features">
+      <div class="feat"><div class="feat-icon">🔒</div><div class="feat-title">Private by default</div><div class="feat-desc">Files live on your own server. No third parties, no tracking.</div></div>
+      <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">Fast uploads</div><div class="feat-desc">Drag and drop any file. Upload multiple at once with live progress.</div></div>
+      <div class="feat"><div class="feat-icon">👤</div><div class="feat-title">Per-user storage</div><div class="feat-desc">Each account gets a dedicated directory. Fully isolated.</div></div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll to explore</span>
+      <svg class="bounce" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script>if (auth.getToken()) window.location.href = "dashboard.html";</script>
+</body>
+</html>
