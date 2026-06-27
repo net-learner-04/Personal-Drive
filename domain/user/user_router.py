@@ -14,6 +14,12 @@ from domain.user.user_crud import passwd_context
 router = APIRouter(prefix="/api/user")
 
 
+def require_admin(current_user: Users = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required.")
+    return current_user
+
+
 @router.post("/email/verify-request")
 def email_verify_request(body: user_schema.EmailVerifyRequest, db: Session = Depends(get_db)):
     existing = db.query(Users).filter(Users.email == body.email).first()
@@ -42,9 +48,9 @@ def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_
 
 @router.post("/login", response_model=user_schema.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = user_crud.get_user(db, form_data.username)
-    if not user or not passwd_context.verify(form_data.password, user.passwd):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Your username or password is incorrect.")
+    user, error = user_crud.check_login(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=error)
     access_token = create_access_token(data={"sub": user.name})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -91,12 +97,26 @@ def update_email(
     return {"message": "Email updated."}
 
 
+@router.patch("/settings/password")
+def update_password(
+    body: user_schema.UserUpdatePassword,
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not user_crud.verify_password(db, current_user, body.current_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect.")
+    user_crud.update_password(db, current_user, body.new_password)
+    return {"message": "Password updated."}
+
+
 @router.delete("/settings/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(
     body: user_schema.UserDelete,
     current_user: Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    if current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin account cannot be deleted this way.")
     if not user_crud.verify_password(db, current_user, body.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password.")
     user_crud.delete_user(db, current_user)
@@ -116,6 +136,39 @@ def reset_password(email: str, code: str, new_password: str, db: Session = Depen
     if not verify_code(email, code, code_type="reset"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The verification code is incorrect or has expired.")
     user = db.query(Users).filter(Users.email == email).first()
-    user.passwd = passwd_context.hash(new_password)
-    db.commit()
+    user_crud.update_password(db, user, new_password)
     return {"message": "Your password has been changed."}
+
+
+@router.get("/admin/users", response_model=list[user_schema.UserResponse])
+def admin_get_users(
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(require_admin)
+):
+    return user_crud.get_all_users(db)
+
+
+@router.delete("/admin/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def admin_delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(require_admin)
+):
+    user = user_crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    if user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot delete admin account.")
+    user_crud.delete_user(db, user)
+
+
+@router.patch("/admin/users/{user_id}/unlock", status_code=status.HTTP_204_NO_CONTENT)
+def admin_unlock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(require_admin)
+):
+    user = user_crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    user_crud.unlock_user(db, user)
