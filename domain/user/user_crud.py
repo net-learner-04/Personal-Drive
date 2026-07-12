@@ -9,6 +9,8 @@ import shutil
 
 load_dotenv()
 
+UPLOAD_DIR = os.getenv("UPLOAD_DIR")
+
 passwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 MAX_ACCOUNT = int(os.getenv("MAX_ACCOUNT"))
 MAX_FAILED_LOGIN = 5
@@ -48,7 +50,7 @@ def create_user(db: Session, user_create: UserCreate, is_admin: bool = False):
 
     date_str = datetime.now().strftime("%Y%m%d")
     dir_name = f"{db_user.id}_{db_user.name}_{date_str}"
-    storage_path = os.path.join("uploads", dir_name)
+    storage_path = os.path.join(UPLOAD_DIR, dir_name)
     os.makedirs(storage_path, exist_ok=True)
 
     db_user.storage_path = storage_path
