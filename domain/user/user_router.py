@@ -109,6 +109,11 @@ def update_password(
     return {"message": "Password updated."}
 
 
+@router.get("/me", response_model=user_schema.UserResponse)
+def get_me(current_user: Users = Depends(get_current_user)):
+    return current_user
+
+
 @router.delete("/settings/delete", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(
     body: user_schema.UserDelete,
