@@ -11,8 +11,11 @@ import os
 import shutil
 import uuid
 import mimetypes
+from dotenv import load_dotenv
 
-UPLOAD_DIR = "./uploads"
+load_dotenv()
+
+UPLOAD_DIR = os.getenv("UPLOAD_DIR")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 PREVIEWABLE = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml", "application/pdf", "text/plain"}
