@@ -57,8 +57,10 @@
   <script src="js/api.js"></script>
   <script>
     if (auth.getToken()) window.location.href = "dashboard.html";
+
     const alertEl = document.getElementById("alert");
     const loginBtn = document.getElementById("loginBtn");
+
     const SPIN = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Signing in...`;
     const DEFAULT = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign In`;
 
@@ -66,12 +68,31 @@
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
       if (!username || !password) { showAlert(alertEl, "Please fill in all fields."); return; }
+
       loginBtn.disabled = true; loginBtn.innerHTML = SPIN; hideAlert(alertEl);
-      const res = await fetch(`${API}/api/user/login`, { method: "POST", headers: {"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({username, password}) });
+
+      const res = await fetch(`${API}/api/user/login`, {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams({username, password})
+      });
       const data = await res.json();
-      if (res.ok) { auth.setToken(data.access_token); auth.setUser({name: username}); window.location.href = "dashboard.html"; }
-      else { showAlert(alertEl, data.detail || "Incorrect username or password."); loginBtn.disabled = false; loginBtn.innerHTML = DEFAULT; }
+
+      if (res.ok) {
+        auth.setToken(data.access_token);
+        const meRes = await fetch(`${API}/api/user/me`, {
+          headers: { Authorization: `Bearer ${data.access_token}` }
+        });
+        const me = await meRes.json();
+        auth.setUser({ name: me.name, is_admin: me.is_admin });
+        window.location.href = "dashboard.html";
+      } else {
+        showAlert(alertEl, data.detail || "Incorrect username or password.");
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = DEFAULT;
+      }
     }
+
     loginBtn.addEventListener("click", login);
     document.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   </script>
