@@ -6,7 +6,7 @@
   <title>Dashboard — Personal-Drive</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    .modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:2rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
+    .modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{width:100%;max-width:440px;padding:2rem;animation:modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);}
     .modal-lg{max-width:640px;}
@@ -29,11 +29,13 @@
     .user-row-clickable{cursor:pointer;transition:all var(--t);}
     .user-row-clickable:hover{background:var(--surface2);}
 
-    .toolbar{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
-    .search-wrap{flex:1;min-width:200px;position:relative;}
+    .toolbar{display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+    .search-wrap{flex:1;min-width:140px;position:relative;}
     .search-wrap svg{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;}
     .search-input{padding-left:2.5rem !important;}
-    .sort-select{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:0.85rem;padding:0.6rem 0.9rem;cursor:pointer;backdrop-filter:blur(10px);}
+    .sort-select{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:0.82rem;padding:0.6rem 0.75rem;cursor:pointer;backdrop-filter:blur(10px);}
+
+    .toolbar-actions{display:flex;gap:0.5rem;flex-shrink:0;}
 
     .breadcrumb{display:flex;align-items:center;gap:0.3rem;margin-bottom:1rem;flex-wrap:wrap;}
     .breadcrumb-item{font-size:0.85rem;font-weight:600;color:var(--text2);cursor:pointer;padding:0.2rem 0.5rem;border-radius:6px;transition:all var(--t);}
@@ -49,20 +51,31 @@
 
     .share-url-box{display:flex;gap:0.5rem;margin-top:0.5rem;}
     .share-url-box input{flex:1;font-size:0.82rem;}
-    .copy-btn{flex-shrink:0;}
-
-    .file-card .action-share{color:#a5b4fc;}
-    .file-card .action-share:hover{color:var(--accent);background:rgba(99,102,241,0.1);}
 
     .folder-card{border-color:rgba(99,102,241,0.2);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04));}
     .folder-card:hover{border-color:rgba(99,102,241,0.4);}
+
+    .upload-drop-zone{border:2px dashed var(--glass-b);border-radius:var(--radius);padding:2rem;text-align:center;transition:all var(--t);}
+    .upload-drop-zone.drag-over{border-color:var(--accent);background:rgba(99,102,241,0.05);}
+    .upload-drop-zone h3{font-size:0.95rem;font-weight:700;margin-bottom:0.35rem;}
+    .upload-drop-zone p{color:var(--text3);font-size:0.82rem;}
+
+    .mobile-menu-btn{display:none;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;color:var(--text);cursor:pointer;padding:0.45rem;align-items:center;justify-content:center;}
+
+    @media(max-width:768px){
+      .mobile-menu-btn{display:flex;}
+      .sidebar{transform:translateX(-100%);transition:transform 0.3s ease;z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .main{margin-left:0 !important;}
+      .sort-select{display:none;}
+    }
   </style>
 </head>
 <body>
   <div class="bg-canvas"><div class="bg-orb"></div><div class="bg-orb"></div><div class="bg-orb"></div></div>
 
   <div class="dash-layout page">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="sidebar-glow"></div>
       <div class="sidebar-logo">
         <div class="sidebar-logo-icon">
@@ -70,23 +83,22 @@
         </div>
         <span>Personal-Drive</span>
       </div>
+
       <nav class="sidebar-nav">
         <div class="sidebar-section">Storage</div>
-        <div class="nav-item active" id="nav-files" onclick="switchTab('files',this)">
+        <div class="nav-item active" id="nav-files" onclick="switchSection('files',this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           My Files
           <span class="nav-badge" id="navCount">0</span>
         </div>
-        <div class="nav-item" id="nav-upload" onclick="switchTab('upload',this)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-          Upload
-        </div>
-        <div class="sidebar-section" style="margin-top:0.5rem;">Admin</div>
-        <div class="nav-item" id="nav-admin" onclick="window.location.href='admin.html'" style="display:none;">
+
+        <div class="sidebar-section" id="adminSection" style="display:none;margin-top:0.5rem;">Management</div>
+        <div class="nav-item" id="nav-admin" style="display:none;" onclick="window.location.href='admin.html'">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Admin Panel
+          Member Management
         </div>
       </nav>
+
       <div class="sidebar-bottom">
         <div class="user-row user-row-clickable" onclick="openSettings()" title="Account settings">
           <div class="avatar" id="userAvatar">?</div>
@@ -105,11 +117,16 @@
 
     <main class="main">
       <header class="topbar-dash">
-        <span class="topbar-title" id="pageTitle">My Files</span>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <span class="topbar-title" id="pageTitle">My Files</span>
+        </div>
         <div class="topbar-right">
           <button class="btn btn-ghost btn-sm" onclick="loadFiles()" style="gap:0.45rem;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            Refresh
+            <span class="hide-mobile">Refresh</span>
           </button>
           <button class="theme-toggle"></button>
         </div>
@@ -131,44 +148,46 @@
 
         <div id="globalAlert" class="alert" style="margin-bottom:1.25rem;"></div>
 
-        <div id="tab-files">
+        <div id="section-files">
           <div class="toolbar">
             <div class="search-wrap">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input class="search-input" type="text" id="searchInput" placeholder="Search files..." oninput="handleSearch()"/>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" type="text" id="searchInput" placeholder="Search..." oninput="handleSearch()"/>
             </div>
             <select class="sort-select" id="sortSelect" onchange="loadFiles()">
-              <option value="date-desc">Newest first</option>
-              <option value="date-asc">Oldest first</option>
+              <option value="date-desc">Newest</option>
+              <option value="date-asc">Oldest</option>
               <option value="name-asc">Name A–Z</option>
               <option value="name-desc">Name Z–A</option>
-              <option value="size-desc">Largest first</option>
-              <option value="size-asc">Smallest first</option>
+              <option value="size-desc">Largest</option>
+              <option value="size-asc">Smallest</option>
             </select>
-            <button class="btn btn-ghost btn-sm" onclick="openNewFolder()" style="gap:0.4rem;flex-shrink:0;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-              New Folder
-            </button>
+            <div class="toolbar-actions">
+              <button class="btn btn-ghost btn-sm" onclick="openNewFolder()" style="gap:0.4rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+                <span class="hide-mobile">New Folder</span>
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="document.getElementById('fileInput').click()" style="gap:0.4rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                Upload
+              </button>
+              <input type="file" id="fileInput" multiple style="display:none;"/>
+            </div>
           </div>
+
+          <div class="progress-wrap" id="progressWrap" style="margin-bottom:1rem;"><div class="progress-fill" id="progressFill"></div></div>
+          <div id="uploadQueue" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
+          <div id="uploadAlert" class="alert" style="margin-bottom:1rem;"></div>
 
           <div class="breadcrumb" id="breadcrumb"></div>
-          <div id="fileList" class="file-list"></div>
-        </div>
 
-        <div id="tab-upload" style="display:none;">
-          <div id="uploadAlert" class="alert" style="margin-bottom:1.25rem;"></div>
-          <div class="section-hdr"><span class="section-title">Upload Files</span></div>
-          <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-            </div>
-            <h3>Drop files here</h3>
-            <p>or <span class="browse">browse your computer</span></p>
-            <p style="margin-top:0.4rem;font-size:0.76rem;">Uploads go to current folder</p>
-            <input type="file" id="fileInput" multiple style="display:none;"/>
+          <div class="upload-drop-zone" id="dropZone" style="display:none;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);margin:0 auto 0.75rem;display:block;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <h3>Drop files to upload</h3>
+            <p>Release to upload to current folder</p>
           </div>
-          <div class="progress-wrap" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
-          <div id="uploadQueue" style="display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem;"></div>
+
+          <div id="fileList" class="file-list"></div>
         </div>
       </div>
     </main>
@@ -197,7 +216,7 @@
       <div class="form-stack">
         <div class="form-group">
           <label>Link expires after</label>
-          <select class="sort-select" id="shareExpiry" style="width:100%;">
+          <select class="sort-select" id="shareExpiry" style="width:100%;font-size:0.9rem;padding:0.75rem 1rem;">
             <option value="1">1 hour</option>
             <option value="6">6 hours</option>
             <option value="24" selected>24 hours</option>
@@ -214,7 +233,7 @@
             <label>Share URL</label>
             <div class="share-url-box">
               <input type="text" id="shareUrl" readonly/>
-              <button class="btn btn-ghost btn-sm copy-btn" onclick="copyShareUrl()">Copy</button>
+              <button class="btn btn-ghost btn-sm" onclick="copyShareUrl()">Copy</button>
             </div>
           </div>
           <p style="color:var(--text3);font-size:0.78rem;margin-top:0.5rem;" id="shareExpireInfo"></p>
@@ -262,7 +281,6 @@
           <span class="modal-title">Account Settings</span>
           <button class="modal-close" onclick="closeModal('settingsOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
-        <div id="settingsAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="settings-list">
           <div class="settings-item" onclick="showSubPanel('namePanel')">
             <div class="settings-icon blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -304,7 +322,7 @@
         </div>
         <div id="emailAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="form-stack">
-          <div class="form-group"><label>New email address</label><input type="email" id="newEmail" placeholder="your@email.com"/></div>
+          <div class="form-group"><label>New email</label><input type="email" id="newEmail" placeholder="your@email.com"/></div>
           <button class="btn btn-primary" id="emailBtn">Update Email</button>
         </div>
       </div>
@@ -347,7 +365,10 @@
     if (user) {
       document.getElementById("userName").textContent = user.name;
       document.getElementById("userAvatar").textContent = user.name[0].toUpperCase();
-      if (user.is_admin) document.getElementById("nav-admin").style.display = "flex";
+      if (user.is_admin) {
+        document.getElementById("nav-admin").style.display = "flex";
+        document.getElementById("adminSection").style.display = "block";
+      }
     }
 
     let currentParentId = null;
@@ -356,10 +377,18 @@
     let currentShareFileId = null;
     let searchTimeout = null;
 
-    function switchTab(name, el) {
-      document.getElementById("tab-files").style.display = name === "files" ? "block" : "none";
-      document.getElementById("tab-upload").style.display = name === "upload" ? "block" : "none";
-      document.getElementById("pageTitle").textContent = name === "files" ? "My Files" : "Upload Files";
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+
+    document.addEventListener("click", e => {
+      const sidebar = document.getElementById("sidebar");
+      if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !e.target.closest(".mobile-menu-btn")) {
+        sidebar.classList.remove("open");
+      }
+    });
+
+    function switchSection(name, el) {
       document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
       el.classList.add("active");
     }
@@ -367,18 +396,14 @@
     function handleSearch() {
       clearTimeout(searchTimeout);
       const q = document.getElementById("searchInput").value.trim();
-      if (q) {
-        searchTimeout = setTimeout(() => searchFiles(q), 350);
-      } else {
-        loadFiles();
-      }
+      if (q) searchTimeout = setTimeout(() => searchFiles(q), 350);
+      else loadFiles();
     }
 
     async function searchFiles(q) {
       const res = await apiFetch(`/api/file/search?q=${encodeURIComponent(q)}`);
       if (!res) return;
-      const files = await res.json();
-      renderFileList(files);
+      renderFileList(await res.json());
     }
 
     function sortFiles(files) {
@@ -395,8 +420,7 @@
     }
 
     function renderBreadcrumb() {
-      const bc = document.getElementById("breadcrumb");
-      bc.innerHTML = breadcrumbs.map((item, i) => {
+      document.getElementById("breadcrumb").innerHTML = breadcrumbs.map((item, i) => {
         const isLast = i === breadcrumbs.length - 1;
         return `${i > 0 ? '<span class="breadcrumb-sep">›</span>' : ''}
           <span class="breadcrumb-item ${isLast ? 'active' : ''}" onclick="${isLast ? '' : `navigateTo(${item.id === null ? 'null' : item.id}, ${i})`}">${item.name}</span>`;
@@ -415,7 +439,6 @@
       const res = await apiFetch(`/api/file/list${param}`);
       if (!res) return;
       const files = await res.json();
-
       const allFiles = files.filter(f => !f.is_folder);
       document.getElementById("navCount").textContent = allFiles.length;
       document.getElementById("statFiles").textContent = allFiles.length;
@@ -423,7 +446,6 @@
       const sizeStr = formatSize(totalBytes);
       const parts = sizeStr.match(/^([\d.]+)\s*(.+)$/);
       document.getElementById("statSize").innerHTML = parts ? `${parts[1]} <span class="unit">${parts[2]}</span>` : sizeStr;
-
       renderBreadcrumb();
       renderFileList(sortFiles(files));
     }
@@ -434,46 +456,24 @@
         list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>This folder is empty</h3><p>Upload files or create a new folder</p></div>`;
         return;
       }
-
-      const folders = files.filter(f => f.is_folder);
-      const fileItems = files.filter(f => !f.is_folder);
-      const sorted = [...folders, ...fileItems];
-
+      const sorted = [...files.filter(f => f.is_folder), ...files.filter(f => !f.is_folder)];
       list.innerHTML = sorted.map((f, i) => {
-        if (f.is_folder) {
-          return `<div class="file-card folder-card" style="animation-delay:${i*0.04}s;cursor:pointer;" onclick="enterFolder(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
-            <div class="file-thumb">📁</div>
-            <div class="file-info">
-              <div class="file-name">${f.file_name}</div>
-              <div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div>
-            </div>
-            <div class="file-actions" onclick="event.stopPropagation()">
-              <button class="btn-icon danger" title="Delete" onclick="deleteItem(${f.id})">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              </button>
-            </div>
-          </div>`;
-        }
+        if (f.is_folder) return `<div class="file-card folder-card" style="animation-delay:${i*0.04}s;cursor:pointer;" onclick="enterFolder(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
+          <div class="file-thumb">📁</div>
+          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div></div>
+          <div class="file-actions" onclick="event.stopPropagation()">
+            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+          </div>
+        </div>`;
         const previewable = ["image/jpeg","image/png","image/gif","image/webp","image/svg+xml","application/pdf","text/plain"].includes(f.file_type);
         return `<div class="file-card" style="animation-delay:${i*0.04}s">
           <div class="file-thumb">${fileEmoji(f.file_type)}</div>
-          <div class="file-info">
-            <div class="file-name">${f.file_name}</div>
-            <div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div>
-          </div>
+          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div></div>
           <div class="file-actions">
-            ${previewable ? `<button class="btn-icon" title="Preview" onclick="previewFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}',${f.file_size})">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>` : ""}
-            <button class="btn-icon action-share" title="Share" onclick="openShare(${f.id})">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            </button>
-            <button class="btn-icon" title="Download" onclick="downloadFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </button>
-            <button class="btn-icon danger" title="Delete" onclick="deleteItem(${f.id})">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            ${previewable ? `<button class="btn-icon" onclick="previewFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>` : ""}
+            <button class="btn-icon" style="color:#a5b4fc;" onclick="openShare(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+            <button class="btn-icon" onclick="downloadFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           </div>
         </div>`;
       }).join("");
@@ -494,71 +494,50 @@
       a.download = name; a.click(); URL.revokeObjectURL(a.href);
     }
 
-    async function previewFile(id, name, size) {
+    async function previewFile(id, name) {
       document.getElementById("previewTitle").textContent = name;
       document.getElementById("previewContent").innerHTML = `<div style="color:var(--text3);padding:2rem;">Loading...</div>`;
       document.getElementById("previewDownloadBtn").onclick = () => downloadFile(id, name);
       document.getElementById("previewOverlay").classList.add("open");
-
       const res = await fetch(`${API}/api/file/preview/${id}`, { headers: { Authorization: `Bearer ${auth.getToken()}` } });
       if (!res.ok) { document.getElementById("previewContent").innerHTML = `<div style="color:var(--danger);padding:2rem;">Preview not available.</div>`; return; }
-
       const contentType = res.headers.get("content-type") || "";
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const content = document.getElementById("previewContent");
-
-      if (contentType.startsWith("image/")) {
-        content.innerHTML = `<img src="${url}" alt="${name}"/>`;
-      } else if (contentType === "application/pdf") {
-        content.innerHTML = `<iframe src="${url}"></iframe>`;
-      } else if (contentType.startsWith("text/")) {
-        const text = await blob.text();
-        content.innerHTML = `<pre>${text.replace(/</g,"&lt;")}</pre>`;
-      } else {
-        content.innerHTML = `<div style="color:var(--text3);padding:2rem;">Cannot preview this file type.</div>`;
-      }
+      if (contentType.startsWith("image/")) content.innerHTML = `<img src="${url}" alt="${name}"/>`;
+      else if (contentType === "application/pdf") content.innerHTML = `<iframe src="${url}"></iframe>`;
+      else if (contentType.startsWith("text/")) { const text = await blob.text(); content.innerHTML = `<pre>${text.replace(/</g,"&lt;")}</pre>`; }
+      else content.innerHTML = `<div style="color:var(--text3);padding:2rem;">Cannot preview this file type.</div>`;
     }
 
     function openShare(fileId) {
       currentShareFileId = fileId;
       document.getElementById("shareResult").style.display = "none";
-      document.getElementById("shareUrl").value = "";
       hideAlert(document.getElementById("shareAlert"));
       document.getElementById("shareOverlay").classList.add("open");
     }
 
-    async function generateShareLink() {
+    document.getElementById("shareBtn").addEventListener("click", async () => {
       const expireHours = parseInt(document.getElementById("shareExpiry").value);
       const btn = document.getElementById("shareBtn");
       btn.textContent = "Generating..."; btn.disabled = true;
-      hideAlert(document.getElementById("shareAlert"));
-
-      const res = await apiFetch("/api/file/share", {
-        method: "POST",
-        body: JSON.stringify({ file_id: currentShareFileId, expire_hours: expireHours })
-      });
+      const res = await apiFetch("/api/file/share", { method: "POST", body: JSON.stringify({file_id: currentShareFileId, expire_hours: expireHours}) });
       const d = await res.json();
-
       if (res.ok) {
-        const fullUrl = `${window.location.origin}${d.url}`;
-        document.getElementById("shareUrl").value = fullUrl;
+        document.getElementById("shareUrl").value = `${window.location.origin}${d.url}`;
         document.getElementById("shareExpireInfo").textContent = `Expires: ${new Date(d.expire_at).toLocaleString()}`;
         document.getElementById("shareResult").style.display = "block";
-      } else {
-        showAlert(document.getElementById("shareAlert"), d.detail || "Failed to generate link.");
-      }
+      } else showAlert(document.getElementById("shareAlert"), d.detail || "Failed to generate link.");
       btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Generate Link`;
       btn.disabled = false;
-    }
+    });
 
     function copyShareUrl() {
       navigator.clipboard.writeText(document.getElementById("shareUrl").value);
-      const btn = document.querySelector(".copy-btn");
+      const btn = document.querySelector("#shareOverlay .btn-ghost.btn-sm");
       btn.textContent = "Copied!"; setTimeout(() => btn.textContent = "Copy", 2000);
     }
-
-    document.getElementById("shareBtn").addEventListener("click", generateShareLink);
 
     function openNewFolder() {
       document.getElementById("folderName").value = "";
@@ -571,9 +550,8 @@
       const name = document.getElementById("folderName").value.trim();
       const a = document.getElementById("folderAlert");
       if (!name) { showAlert(a, "Please enter a folder name."); return; }
-      const btn = document.getElementById("folderBtn");
-      btn.textContent = "Creating..."; btn.disabled = true; hideAlert(a);
-      const body = { folder_name: name };
+      const btn = document.getElementById("folderBtn"); btn.textContent = "Creating..."; btn.disabled = true;
+      const body = {folder_name: name};
       if (currentParentId !== null) body.parent_id = currentParentId;
       const res = await apiFetch("/api/file/folder", { method: "POST", body: JSON.stringify(body) });
       if (res?.ok) { closeModal("folderOverlay"); loadFiles(); }
@@ -588,13 +566,13 @@
       else showAlert(document.getElementById("globalAlert"), "Delete failed.");
     }
 
-    const uploadZone = document.getElementById("uploadZone");
     const fileInput = document.getElementById("fileInput");
-    uploadZone.addEventListener("click", () => fileInput.click());
-    uploadZone.addEventListener("dragover", e => { e.preventDefault(); uploadZone.classList.add("drag-over"); });
-    uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
-    uploadZone.addEventListener("drop", e => { e.preventDefault(); uploadZone.classList.remove("drag-over"); uploadFiles(e.dataTransfer.files); });
     fileInput.addEventListener("change", () => uploadFiles(fileInput.files));
+
+    const dropZone = document.getElementById("dropZone");
+    document.addEventListener("dragover", e => { e.preventDefault(); dropZone.style.display = "block"; dropZone.classList.add("drag-over"); });
+    document.addEventListener("dragleave", e => { if (!e.relatedTarget) { dropZone.style.display = "none"; dropZone.classList.remove("drag-over"); } });
+    document.addEventListener("drop", e => { e.preventDefault(); dropZone.style.display = "none"; dropZone.classList.remove("drag-over"); uploadFiles(e.dataTransfer.files); });
 
     async function uploadFiles(files) {
       if (!files.length) return;
@@ -605,7 +583,7 @@
       hideAlert(alertEl); progressWrap.classList.add("show"); queue.innerHTML = "";
       [...files].forEach(f => {
         const el = document.createElement("div"); el.className = "queue-item";
-        el.innerHTML = `<span style="font-size:1.2rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span><span style="color:var(--text3);font-size:0.76rem">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`;
+        el.innerHTML = `<span style="font-size:1.1rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem">${f.name}</span><span style="color:var(--text3);font-size:0.74rem;flex-shrink:0">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`;
         queue.appendChild(el);
       });
       let done = 0;
@@ -617,10 +595,10 @@
         const url = currentParentId !== null ? `/api/file/upload?parent_id=${currentParentId}` : "/api/file/upload";
         const res = await apiFetch(url, { method: "POST", body: form });
         done++; progressFill.style.width = `${(done/files.length)*100}%`;
-        if (s) { if (res?.ok) { s.textContent = "✓ Done"; s.className = "q-status q-ok"; } else { s.textContent = "✗ Failed"; s.className = "q-status q-err"; } }
+        if (s) { if (res?.ok) { s.textContent = "✓"; s.className = "q-status q-ok"; } else { s.textContent = "✗"; s.className = "q-status q-err"; } }
       }
       showAlert(alertEl, `${done} of ${files.length} file(s) uploaded.`, done===files.length?"success":"error");
-      setTimeout(() => { progressWrap.classList.remove("show"); progressFill.style.width = "0%"; }, 2000);
+      setTimeout(() => { progressWrap.classList.remove("show"); progressFill.style.width="0%"; queue.innerHTML=""; hideAlert(alertEl); }, 3000);
       fileInput.value = ""; loadFiles();
     }
 
@@ -648,15 +626,14 @@
       const pw = document.getElementById("gatePassword").value;
       const a = document.getElementById("gateAlert");
       if (!pw) { showAlert(a, "Please enter your password."); return; }
-      const btn = document.getElementById("gateBtn");
-      btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
+      const btn = document.getElementById("gateBtn"); btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/verify", { method: "POST", body: JSON.stringify({password: pw}) });
       if (res?.ok) { verifiedPassword = pw; document.getElementById("gatePanel").style.display = "none"; document.getElementById("settingsPanel").style.display = "block"; }
       else { const d = await res.json(); showAlert(a, d.detail || "Incorrect password."); }
       btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Unlock Settings`;
       btn.disabled = false;
     });
-    document.getElementById("gatePassword").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("gateBtn").click(); });
+    document.getElementById("gatePassword").addEventListener("keydown", e => { if (e.key==="Enter") document.getElementById("gateBtn").click(); });
 
     document.getElementById("nameBtn").addEventListener("click", async () => {
       const newName = document.getElementById("newName").value.trim();
@@ -670,9 +647,9 @@
         if (d.access_token) auth.setToken(d.access_token);
         document.getElementById("userName").textContent = newName;
         document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
-        showAlert(a, "Username updated successfully!", "success");
+        showAlert(a, "Username updated!", "success");
         document.getElementById("newName").value = "";
-      } else { showAlert(a, d.detail || "Failed to update username."); }
+      } else showAlert(a, d.detail || "Failed to update username.");
       btn.textContent = "Update Username"; btn.disabled = false;
     });
 
@@ -683,8 +660,8 @@
       const btn = document.getElementById("emailBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) });
       const d = await res.json();
-      if (res.ok) { showAlert(a, "Email updated successfully!", "success"); document.getElementById("newEmail").value = ""; }
-      else { showAlert(a, d.detail || "Failed to update email."); }
+      if (res.ok) { showAlert(a, "Email updated!", "success"); document.getElementById("newEmail").value = ""; }
+      else showAlert(a, d.detail || "Failed to update email.");
       btn.textContent = "Update Email"; btn.disabled = false;
     });
 
@@ -700,10 +677,10 @@
       const d = await res.json();
       if (res.ok) {
         verifiedPassword = newPassword;
-        showAlert(a, "Password updated successfully!", "success");
+        showAlert(a, "Password updated!", "success");
         document.getElementById("newPassword").value = "";
         document.getElementById("newPassword2").value = "";
-      } else { showAlert(a, d.detail || "Failed to update password."); }
+      } else showAlert(a, d.detail || "Failed to update password.");
       btn.textContent = "Update Password"; btn.disabled = false;
     });
 
@@ -711,13 +688,13 @@
       const confirmText = document.getElementById("deleteConfirm").value;
       const a = document.getElementById("deleteAlert");
       if (confirmText !== "DELETE") { showAlert(a, "Type DELETE (all caps) to confirm."); return; }
-      const btn = document.getElementById("deleteBtn"); btn.textContent = "Deleting..."; btn.disabled = true; hideAlert(a);
+      const btn = document.getElementById("deleteBtn"); btn.textContent = "Deleting..."; btn.disabled = true;
       const res = await apiFetch("/api/user/settings/delete", { method: "DELETE", body: JSON.stringify({password: verifiedPassword}) });
-      if (res?.ok) { auth.logout(); }
+      if (res?.ok) auth.logout();
       else { const d = await res.json(); showAlert(a, d.detail || "Failed to delete account."); btn.textContent = "Delete My Account"; btn.disabled = false; }
     });
 
-    document.addEventListener("keydown", e => { if (e.key === "Escape") { ["previewOverlay","shareOverlay","folderOverlay","settingsOverlay"].forEach(closeModal); } });
+    document.addEventListener("keydown", e => { if (e.key==="Escape") ["previewOverlay","shareOverlay","folderOverlay","settingsOverlay"].forEach(closeModal); });
 
     loadFiles();
   </script>
