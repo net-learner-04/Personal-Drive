@@ -12,6 +12,7 @@ import shutil
 import uuid
 import mimetypes
 from dotenv import load_dotenv
+from typing import Optional
 
 load_dotenv()
 
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/api/file")
 
 class FolderCreate(BaseModel):
     folder_name: str
-    parent_id: int | None = None
+    parent_id: Optional[int] = None
 
 
 class ShareCreate(BaseModel):
@@ -35,7 +36,7 @@ class ShareCreate(BaseModel):
 
 class FileMoveBody(BaseModel):
     file_id: int
-    new_parent_id: int | None = None
+    new_parent_id: Optional[int] = None
 
 
 def _get_owned_file(db: Session, file_id: int, user: Users):
@@ -52,7 +53,7 @@ def _get_owned_file(db: Session, file_id: int, user: Users):
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile = File(...),
-    parent_id: int | None = None,
+    parent_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
@@ -133,7 +134,7 @@ def create_folder(
 
 @router.get("/list")
 def get_file_list(
-    parent_id: int | None = None,
+    parent_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
