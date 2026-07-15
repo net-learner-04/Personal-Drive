@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator, EmailStr
 from pydantic_core.core_schema import FieldValidationInfo
+from typing import Optional
 
 
 class Token(BaseModel):
@@ -92,11 +93,11 @@ class EmailVerifyConfirm(BaseModel):
 class UserResponse(BaseModel):
     id: int
     name: str
-    email: str | None
+    email: Optional[str] = None
     is_admin: bool
     failed_login: int
-    locked_until: str | None
-    storage_path: str | None
+    locked_until: Optional[str] = None
+    storage_path: Optional[str] = None
 
     class Config:
         from_attributes = True
