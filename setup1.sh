@@ -2,8 +2,9 @@
 
 clear
 
-# Set the path to the file uploads directory.
+# Set the path to the file uploads directory and datebase directory.
 UPLOADS_PATH="/mnt/storage/personal-drive/uploads"
+DIR_PATH="/home/haruki/personal_drive/data"
 
 # Set the port for the application to listen on.
 PORT=2926
@@ -13,6 +14,15 @@ if [ "$EUID" -ne 0 ]
 then
     echo "Error: Run as root."
     exit 1
+fi
+
+if [ ! -d "$DIR_PATH" ]
+then
+    echo "The database directory cannot be found."
+    echo "Create a directory and assign permissions."
+    mkdir -p "$DIR_PATH"
+    chown -R haruki:haruki /home/haruki/personal_drive/data
+    chmod 755 /home/haruki/personal_drive/data
 fi
 
 # Check if Python packages are installed.
@@ -70,5 +80,5 @@ fi
 
 # Start the application using uvicorn and cloudflared.
 echo "Starting the application..."
-echo "Run the \`setup2.sh\` file in a new terminal to complete the web server setup."
+echo -e "\e[31mRun the \`setup2.sh\` file in a new terminal to complete the web server setup.\e[0m"
 python3 -m uvicorn main:app --host 127.0.0.1 --port $PORT --reload
