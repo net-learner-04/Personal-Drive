@@ -51,37 +51,47 @@ fi
 # CloudFlare Tunnel execution code.
 echo "Starting the application..."
 
-# Create a temporary Named Pipe (FIFO) to intercept the live stream without blocking.
-FIFO_PIPE="/tmp/cf_tunnel_pipe"
-rm -f "$FIFO_PIPE"
-mkfifo "$FIFO_PIPE"
+# Create a temporary log file to capture the live Cloudflared output.
+LOG_FILE=$(mktemp)
 
-# Launch cloudflared in the background, redirecting stderr (2) to the named pipe.
-# Cloudflared outputs its operational logs strictly through stderr.
-cloudflared tunnel --url http://localhost:$PORT 2> "$FIFO_PIPE" &
-TUNNEL_PID=$!
+# Start Cloudflared while displaying logs on the console and writing them to the log file.
+cloudflared tunnel --url http://localhost:$PORT 2>&1 | tee "$LOG_FILE" &
+PIPE_PID=$!
 
-# Read the stream line-by-line via sed until the trycloudflare URL matches.
-# Using 'head -n 1' ensures this block breaks immediately once the first match is found.
-TUNNEL_URL=$(sed -n 's|.*\(https://[a-zA-Z0-9-]\+\.trycloudflare\.com\).*|\1|p' "$FIFO_PIPE" | head -n 1)
+# Wait until the first TryCloudflare URL appears in the log file.
+TUNNEL_URL=""
+while [ -z "$TUNNEL_URL" ]; do
+    TUNNEL_URL=$(grep -m1 -oE 'https://[[:alnum:]-]+\.trycloudflare\.com' "$LOG_FILE")
 
-# Clean up the named pipe asset as it is no longer required.
-rm -f "$FIFO_PIPE"
+    # Exit if the Cloudflared process terminates before a URL is found.
+    if ! kill -0 "$PIPE_PID" 2>/dev/null; then
+        break
+    fi
+
+    sleep 0.2
+done
 
 # If the URL was parsed successfully, broadcast it to the console and Discord.
-if [ ! -z "$TUNNEL_URL" ]; then
+if [ -n "$TUNNEL_URL" ]; then
     # 1. Output directly to the local terminal console (Bold Green for Success, Bold Red for the URL).
     echo -e "\n\e[1;32m[Success] Cloudflare Tunnel is running!\e[0m"
     echo -e "Your Web Server URL: \e[1;31m$TUNNEL_URL\e[0m\n"
-    
-    # 2. Transmit the payload payload asynchronously to Discord via Webhook API if configured.
-    if [ "$DISCORD_WEBHOOK_URL" != "YOUR_DISCORD_WEBHOOK_URL_HERE" ]; then
-        PAYLOAD=$(printf '{"content": "**Cloudflare Tunnel Started!**\\n URL: %s"}' "$TUNNEL_URL")
-        curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL" &> /dev/null &
+
+    # 2. Transmit the payload asynchronously to Discord via Webhook API if configured.
+    if [ -n "$DISCORD_WEBHOOK_URL" ]; then
+        PAYLOAD=$(printf '{"content":"**Cloudflare Tunnel Started!**\nURL: %s"}' "$TUNNEL_URL")
+
+        curl \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK_URL" \
+            >/dev/null 2>&1 &
     fi
 else
     echo "Error: Failed to extract Cloudflare Tunnel URL."
 fi
 
-# Hand over process flow execution back to the background tunnel thread.
-wait $TUNNEL_PID
+# Wait for the Cloudflared process to exit and remove the temporary log file.
+wait "$PIPE_PID"
+rm -f "$LOG_FILE"
