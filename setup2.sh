@@ -17,7 +17,8 @@ fi
 
 # Registering and Installing the Cloudflare Package Repository.
 echo "Installing Cloudflare Tunnel..."
-if ! command -v cloudflared &> /dev/null; then
+if ! command -v cloudflared &> /dev/null
+then
     echo "Cloudflare Tunnel is not installed. Downloading official RPM..."
     
     # Remove any existing broken repository files that may still be present.
@@ -38,7 +39,8 @@ if ! command -v cloudflared &> /dev/null; then
     echo "Downloading from: $RPM_URL"
     dnf install -y "$RPM_URL"
     
-    if command -v cloudflared &> /dev/null; then
+    if command -v cloudflared &> /dev/null
+    then
         echo "Cloudflare Tunnel installed successfully."
     else
         echo "Error: Cloudflare Tunnel installation failed."
@@ -60,11 +62,12 @@ PIPE_PID=$!
 
 # Wait until the first TryCloudflare URL appears in the log file.
 TUNNEL_URL=""
-while [ -z "$TUNNEL_URL" ]; do
-    TUNNEL_URL=$(grep -m1 -oE 'https://[[:alnum:]-]+\.trycloudflare\.com' "$LOG_FILE")
+while [ -z "$TUNNEL_URL" ]
+do
+    TUNNEL_URL=$(grep -m1 -oE 'https://[[:alnum:]-]+\.trycloudflare\.com' "$LOG_FILE" | tr -d '\r\n')
 
-    # Exit if the Cloudflared process terminates before a URL is found.
-    if ! kill -0 "$PIPE_PID" 2>/dev/null; then
+    if ! kill -0 "$PIPE_PID" 2>/dev/null
+    then
         break
     fi
 
@@ -72,24 +75,26 @@ while [ -z "$TUNNEL_URL" ]; do
 done
 
 # If the URL was parsed successfully, broadcast it to the console and Discord.
-if [ -n "$TUNNEL_URL" ]; then
+if [ -n "$TUNNEL_URL" ]
+then
     # 1. Output directly to the local terminal console (Bold Green for Success, Bold Red for the URL).
-    echo -e "\n\e[1;32m[Success] Cloudflare Tunnel is running!\e[0m"
-    echo -e "Your Web Server URL: \e[1;31m$TUNNEL_URL\e[0m\n"
+    echo -e "\n\e[1;32mCloudflare Tunnel is running...\e[0m"
+    echo -e "Web Server URL: \e[1;31m$TUNNEL_URL\e[0m\n"
 
     # 2. Transmit the payload asynchronously to Discord via Webhook API if configured.
-    if [ -n "$DISCORD_WEBHOOK_URL" ]; then
-        PAYLOAD=$(printf '{"content":"**Cloudflare Tunnel Started!**\nURL: %s"}' "$TUNNEL_URL")
+    if [ -n "$DISCORD_WEBHOOK_URL" ]
+    then
+        PAYLOAD=$(printf '{"content":"**Cloudflare Tunnel**\\n\nURL: %s"}' "$TUNNEL_URL")
 
-        curl \
-            -H "Content-Type: application/json" \
-            -X POST \
-            -d "$PAYLOAD" \
-            "$DISCORD_WEBHOOK_URL" \
-            >/dev/null 2>&1 &
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "$PAYLOAD" \
+             "$DISCORD_WEBHOOK_URL"
+        
+        echo ""
     fi
 else
-    echo "Error: Failed to extract Cloudflare Tunnel URL."
+    echo "Failed to extract Cloudflare Tunnel URL."
 fi
 
 # Wait for the Cloudflared process to exit and remove the temporary log file.
