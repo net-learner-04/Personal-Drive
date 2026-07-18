@@ -20,5 +20,6 @@ def startup():
     db = SessionLocal()
     try:
         user_crud.create_admin_if_not_exists(db)
+        user_crud.check_dormant_accounts(db)
     finally:
         db.close()
