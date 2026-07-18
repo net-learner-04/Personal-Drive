@@ -1,15 +1,21 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
+import os
+import shutil
 
 from db import get_db
 from models import Users
 from auth import create_access_token, get_current_user
-from mailer import send_reset_code, send_register_code, verify_code
+from mailer import send_reset_code, send_register_code, verify_code, send_dormant_unlock_code
 from domain.user import user_crud, user_schema
 from domain.user.user_crud import passwd_context
 
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+PROFILE_DIR = os.path.join(UPLOAD_DIR, "_profiles")
+os.makedirs(PROFILE_DIR, exist_ok=True)
 
 router = APIRouter(prefix="/api/user")
 
@@ -48,11 +54,18 @@ def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_
 
 @router.post("/login", response_model=user_schema.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user, error = user_crud.check_login(db, form_data.username, form_data.password)
+    user, error, dormant_user = user_crud.check_login(db, form_data.username, form_data.password)
+    if dormant_user:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="dormant")
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=error)
     access_token = create_access_token(data={"sub": user.name})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me", response_model=user_schema.UserResponse)
+def get_me(current_user: Users = Depends(get_current_user)):
+    return current_user
 
 
 @router.post("/settings/verify")
@@ -109,9 +122,33 @@ def update_password(
     return {"message": "Password updated."}
 
 
-@router.get("/me", response_model=user_schema.UserResponse)
-def get_me(current_user: Users = Depends(get_current_user)):
-    return current_user
+@router.post("/settings/profile-image")
+async def upload_profile_image(
+    file: UploadFile = File(...),
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    allowed_types = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Only image files are allowed.")
+
+    ext = file.filename.rsplit(".", 1)[-1].lower()
+    filename = f"{current_user.id}_profile.{ext}"
+    file_path = os.path.join(PROFILE_DIR, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    user_crud.update_profile_image(db, current_user, file_path)
+    return {"message": "Profile image updated.", "path": f"/api/user/profile-image/{current_user.id}"}
+
+
+@router.get("/profile-image/{user_id}")
+def get_profile_image(user_id: int, db: Session = Depends(get_db)):
+    user = user_crud.get_user_by_id(db, user_id)
+    if not user or not user.profile_image or not os.path.exists(user.profile_image):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile image not found.")
+    return FileResponse(user.profile_image)
 
 
 @router.delete("/settings/delete", status_code=status.HTTP_204_NO_CONTENT)
@@ -145,6 +182,28 @@ def reset_password(email: str, code: str, new_password: str, db: Session = Depen
     return {"message": "Your password has been changed."}
 
 
+@router.post("/dormant/unlock-request")
+def dormant_unlock_request(email: str, db: Session = Depends(get_db)):
+    user = db.query(Users).filter(Users.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Email not found.")
+    if not user.is_dormant:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Account is not dormant.")
+    send_dormant_unlock_code(email)
+    return {"message": "Unlock code sent to your email."}
+
+
+@router.post("/dormant/unlock-confirm")
+def dormant_unlock_confirm(email: str, code: str, db: Session = Depends(get_db)):
+    if not verify_code(email, code, code_type="dormant"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired code.")
+    user = db.query(Users).filter(Users.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    user_crud.activate_dormant(db, user)
+    return {"message": "Account reactivated. You can now sign in."}
+
+
 @router.get("/admin/users", response_model=list[user_schema.UserResponse])
 def admin_get_users(
     db: Session = Depends(get_db),
@@ -167,6 +226,20 @@ def admin_delete_user(
     user_crud.delete_user(db, user)
 
 
+@router.patch("/admin/users/{user_id}/lock", status_code=status.HTTP_204_NO_CONTENT)
+def admin_lock_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(require_admin)
+):
+    user = user_crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    if user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot lock admin account.")
+    user_crud.lock_user(db, user)
+
+
 @router.patch("/admin/users/{user_id}/unlock", status_code=status.HTTP_204_NO_CONTENT)
 def admin_unlock_user(
     user_id: int,
@@ -177,6 +250,18 @@ def admin_unlock_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
     user_crud.unlock_user(db, user)
+
+
+@router.patch("/admin/users/{user_id}/dormant-unlock", status_code=status.HTTP_204_NO_CONTENT)
+def admin_dormant_unlock(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(require_admin)
+):
+    user = user_crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    user_crud.activate_dormant(db, user)
 
 
 @router.get("/admin/config")
