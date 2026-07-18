@@ -179,14 +179,17 @@
         setTimeout(() => window.location.href = "dashboard.html", 1500);
         return;
       }
+    
+      const configRes = await apiFetch("/api/user/admin/config");
+      const config = await configRes.json();
+      const maxAccount = config.max_account;
+    
       allUsers = await res.json();
-
       const total = allUsers.length;
       const locked = allUsers.filter(u => isLocked(u)).length;
       const active = total - locked;
-      const maxAccount = 4;
       const nonAdmins = allUsers.filter(u => !u.is_admin).length;
-
+    
       document.getElementById("statTotal").textContent = total;
       document.getElementById("statActive").textContent = active;
       document.getElementById("statLocked").textContent = locked;
