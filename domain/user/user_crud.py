@@ -10,11 +10,11 @@ import shutil
 load_dotenv()
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR")
-
 passwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 MAX_ACCOUNT = int(os.getenv("MAX_ACCOUNT"))
 MAX_FAILED_LOGIN = 5
 LOCKOUT_MINUTES = 15
+DORMANT_DAYS = 30
 
 
 def get_existing_user(db: Session, user_create: UserCreate):
@@ -87,11 +87,14 @@ def verify_password(db: Session, user: Users, password: str):
 def check_login(db: Session, username: str, password: str):
     user = get_user(db, username)
     if not user:
-        return None, "User not found."
+        return None, "User not found.", None
+
+    if user.is_dormant:
+        return None, "dormant", user
 
     if user.locked_until and datetime.now() < user.locked_until:
         remaining = int((user.locked_until - datetime.now()).total_seconds() / 60) + 1
-        return None, f"Account locked. Try again in {remaining} minute(s)."
+        return None, f"Account locked. Try again in {remaining} minute(s).", None
 
     if not passwd_context.verify(password, user.passwd):
         user.failed_login = (user.failed_login or 0) + 1
@@ -99,15 +102,29 @@ def check_login(db: Session, username: str, password: str):
             user.locked_until = datetime.now() + timedelta(minutes=LOCKOUT_MINUTES)
             user.failed_login = 0
             db.commit()
-            return None, f"Too many failed attempts. Account locked for {LOCKOUT_MINUTES} minutes."
+            return None, f"Too many failed attempts. Account locked for {LOCKOUT_MINUTES} minutes.", None
         db.commit()
         remaining_attempts = MAX_FAILED_LOGIN - user.failed_login
-        return None, f"Incorrect password. {remaining_attempts} attempt(s) remaining."
+        return None, f"Incorrect password. {remaining_attempts} attempt(s) remaining.", None
 
     user.failed_login = 0
     user.locked_until = None
+    user.last_login = datetime.now()
     db.commit()
-    return user, None
+    return user, None, None
+
+
+def check_dormant_accounts(db: Session):
+    threshold = datetime.now() - timedelta(days=DORMANT_DAYS)
+    users = db.query(Users).filter(
+        Users.is_admin == False,
+        Users.is_dormant == False,
+        Users.last_login != None,
+        Users.last_login < threshold
+    ).all()
+    for user in users:
+        user.is_dormant = True
+    db.commit()
 
 
 def update_name(db: Session, user: Users, new_name: str):
@@ -125,6 +142,11 @@ def update_password(db: Session, user: Users, new_password: str):
     db.commit()
 
 
+def update_profile_image(db: Session, user: Users, image_path: str):
+    user.profile_image = image_path
+    db.commit()
+
+
 def delete_user(db: Session, user: Users):
     if user.storage_path and os.path.exists(user.storage_path):
         shutil.rmtree(user.storage_path)
@@ -135,4 +157,15 @@ def delete_user(db: Session, user: Users):
 def unlock_user(db: Session, user: Users):
     user.failed_login = 0
     user.locked_until = None
+    db.commit()
+
+
+def lock_user(db: Session, user: Users):
+    user.locked_until = datetime.now() + timedelta(days=36500)
+    db.commit()
+
+
+def activate_dormant(db: Session, user: Users):
+    user.is_dormant = False
+    user.last_login = datetime.now()
     db.commit()
