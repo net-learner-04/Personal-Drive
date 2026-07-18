@@ -177,3 +177,8 @@ def admin_unlock_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
     user_crud.unlock_user(db, user)
+
+
+@router.get("/admin/config")
+def get_config(current_user: Users = Depends(require_admin)):
+    return {"max_account": user_crud.MAX_ACCOUNT}
