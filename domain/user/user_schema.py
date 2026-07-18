@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator, EmailStr
 from pydantic_core.core_schema import FieldValidationInfo
 from typing import Optional
+from datetime import datetime
 
 
 class Token(BaseModel):
@@ -96,7 +97,10 @@ class UserResponse(BaseModel):
     email: Optional[str] = None
     is_admin: bool
     failed_login: int
-    locked_until: Optional[str] = None
+    locked_until: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    is_dormant: bool = False
+    profile_image: Optional[str] = None
     storage_path: Optional[str] = None
 
     class Config:
