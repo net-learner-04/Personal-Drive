@@ -30,27 +30,64 @@
         </div>
         <span>Personal-Drive</span>
       </a>
-      <h1 class="auth-heading">Welcome back</h1>
-      <p class="auth-sub">Sign in to access your private cloud</p>
-      <div id="alert" class="alert" style="margin-bottom:1rem;"></div>
-      <div class="form-stack">
-        <div class="form-group">
-          <label>Username</label>
-          <input type="text" id="username" placeholder="Enter your username" autocomplete="username"/>
+
+      <div id="loginSection">
+        <h1 class="auth-heading">Welcome back</h1>
+        <p class="auth-sub">Sign in to access your private cloud</p>
+        <div id="alert" class="alert" style="margin-bottom:1rem;"></div>
+        <div class="form-stack">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="Enter your username" autocomplete="username"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password"/>
+          </div>
+          <div style="text-align:right;margin-top:-0.4rem;">
+            <a href="reset-password.html" style="font-size:0.8rem;color:var(--text3);">Forgot password?</a>
+          </div>
+          <button class="btn btn-primary" id="loginBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Sign In
+          </button>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password"/>
-        </div>
-        <div style="text-align:right;margin-top:-0.4rem;">
-          <a href="reset-password.html" style="font-size:0.8rem;color:var(--text3);">Forgot password?</a>
-        </div>
-        <button class="btn btn-primary" id="loginBtn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Sign In
-        </button>
+        <div class="auth-footer">Don't have an account? <a href="register.html">Create one</a></div>
       </div>
-      <div class="auth-footer">Don't have an account? <a href="register.html">Create one</a></div>
+
+      <div id="dormantSection" style="display:none;text-align:center;">
+        <div style="width:64px;height:64px;background:rgba(244,63,94,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.75rem;">😴</div>
+        <h1 class="auth-heading" style="font-size:1.4rem;">Account Dormant</h1>
+        <p class="auth-sub">Your account has been inactive for 30+ days and has been placed in dormant status.</p>
+        <div id="dormantAlert" class="alert" style="margin-bottom:1rem;text-align:left;"></div>
+
+        <div id="dormantStep1">
+          <div class="form-stack">
+            <div class="form-group" style="text-align:left;">
+              <label>Email address</label>
+              <input type="email" id="dormantEmail" placeholder="your@email.com"/>
+            </div>
+            <button class="btn btn-primary" id="dormantSendBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send Unlock Code
+            </button>
+          </div>
+        </div>
+
+        <div id="dormantStep2" style="display:none;">
+          <div class="form-stack">
+            <div class="form-group" style="text-align:left;">
+              <label>Verification code</label>
+              <input type="text" id="dormantCode" placeholder="000000" maxlength="6" style="text-align:center;letter-spacing:0.35em;font-size:1.35rem;font-weight:800;"/>
+            </div>
+            <button class="btn btn-primary" id="dormantVerifyBtn">Reactivate Account</button>
+          </div>
+        </div>
+
+        <div style="margin-top:1.25rem;">
+          <button onclick="showLoginSection()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:0.84rem;">← Back to sign in</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -60,15 +97,24 @@
 
     const alertEl = document.getElementById("alert");
     const loginBtn = document.getElementById("loginBtn");
-
     const SPIN = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Signing in...`;
     const DEFAULT = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign In`;
+
+    function showLoginSection() {
+      document.getElementById("loginSection").style.display = "block";
+      document.getElementById("dormantSection").style.display = "none";
+    }
+
+    function showDormantSection(email) {
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("dormantSection").style.display = "block";
+      if (email) document.getElementById("dormantEmail").value = email;
+    }
 
     async function login() {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
       if (!username || !password) { showAlert(alertEl, "Please fill in all fields."); return; }
-
       loginBtn.disabled = true; loginBtn.innerHTML = SPIN; hideAlert(alertEl);
 
       const res = await fetch(`${API}/api/user/login`, {
@@ -84,8 +130,10 @@
           headers: { Authorization: `Bearer ${data.access_token}` }
         });
         const me = await meRes.json();
-        auth.setUser({ name: me.name, is_admin: me.is_admin });
+        auth.setUser({ name: me.name, is_admin: me.is_admin, id: me.id, profile_image: me.profile_image });
         window.location.href = "dashboard.html";
+      } else if (res.status === 403 && data.detail === "dormant") {
+        showDormantSection("");
       } else {
         showAlert(alertEl, data.detail || "Incorrect username or password.");
         loginBtn.disabled = false;
@@ -94,7 +142,52 @@
     }
 
     loginBtn.addEventListener("click", login);
-    document.addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+    document.addEventListener("keydown", e => { if (e.key === "Enter" && document.getElementById("loginSection").style.display !== "none") login(); });
+
+    let dormantEmail = "";
+
+    document.getElementById("dormantSendBtn").addEventListener("click", async () => {
+      const email = document.getElementById("dormantEmail").value.trim();
+      const a = document.getElementById("dormantAlert");
+      if (!email) { showAlert(a, "Please enter your email."); return; }
+      const btn = document.getElementById("dormantSendBtn");
+      btn.textContent = "Sending..."; btn.disabled = true; hideAlert(a);
+      const res = await fetch(`${API}/api/user/dormant/unlock-request?email=${encodeURIComponent(email)}`, { method: "POST" });
+      const d = await res.json();
+      if (res.ok) {
+        dormantEmail = email;
+        document.getElementById("dormantStep1").style.display = "none";
+        document.getElementById("dormantStep2").style.display = "block";
+        showAlert(a, "Unlock code sent! Check your inbox.", "success");
+      } else {
+        showAlert(a, d.detail || "Failed to send unlock code.");
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Unlock Code`;
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("dormantVerifyBtn").addEventListener("click", async () => {
+      const code = document.getElementById("dormantCode").value.trim();
+      const a = document.getElementById("dormantAlert");
+      if (!code) { showAlert(a, "Please enter the verification code."); return; }
+      const btn = document.getElementById("dormantVerifyBtn");
+      btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
+      const params = new URLSearchParams({ email: dormantEmail, code });
+      const res = await fetch(`${API}/api/user/dormant/unlock-confirm?${params}`, { method: "POST" });
+      const d = await res.json();
+      if (res.ok) {
+        showAlert(a, "Account reactivated! Redirecting to sign in...", "success");
+        setTimeout(() => {
+          showLoginSection();
+          document.getElementById("dormantStep1").style.display = "block";
+          document.getElementById("dormantStep2").style.display = "none";
+        }, 2000);
+      } else {
+        showAlert(a, d.detail || "Invalid or expired code.");
+        btn.textContent = "Reactivate Account";
+        btn.disabled = false;
+      }
+    });
   </script>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 </body>
