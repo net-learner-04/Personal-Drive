@@ -635,10 +635,10 @@
     function openSettings() {
       verifiedPassword = "";
       document.getElementById("gatePassword").value = "";
-      document.getElementById("gatePanel").style.display = "block";
+      ["profilePanel","namePanel","emailPanel","passwordPanel","deletePanel"].forEach(p => document.getElementById(p).style.display = "none");
       document.getElementById("settingsPanel").style.display = "none";
+      document.getElementById("gatePanel").style.display = "block";
       hideAlert(document.getElementById("gateAlert"));
-      showSubPanel(null);
       document.getElementById("settingsOverlay").classList.add("open");
       setTimeout(() => document.getElementById("gatePassword").focus(), 100);
     }
