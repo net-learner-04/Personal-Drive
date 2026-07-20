@@ -149,3 +149,19 @@ def verify_code(email: str, code: str, code_type: str = None):
         return False
     del verify_store[email]
     return True
+
+
+def send_dormant_unlock_code(to: str):
+    code = _generate_code()
+    verify_store[to] = {
+        "code": code,
+        "expire": datetime.now() + timedelta(minutes=10),
+        "type": "dormant"
+    }
+    html = _build_html(
+        title="Account Reactivation",
+        message="Reactivate your dormant account",
+        code=code,
+        expire_minutes=10
+    )
+    _send_email(to, f"[{MAIL_FROM_NAME}] Reactivate your account", html)
