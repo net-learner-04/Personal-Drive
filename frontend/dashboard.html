@@ -17,7 +17,6 @@
     .modal-close:hover{color:var(--text);background:var(--surface2);}
     .modal-back{background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center;flex-shrink:0;}
     .modal-back:hover{color:var(--text);background:var(--surface2);}
-
     .settings-list{display:flex;flex-direction:column;gap:0.45rem;}
     .settings-item{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t);}
     .settings-item:hover{background:var(--glass-h);border-color:rgba(99,102,241,0.3);transform:translateX(3px);}
@@ -28,53 +27,43 @@
     .settings-icon.green{background:rgba(16,185,129,0.12);color:var(--success);}
     .settings-label{font-size:0.9rem;font-weight:600;}
     .settings-sub{font-size:0.76rem;color:var(--text3);margin-top:0.1rem;}
-
     .user-row-clickable{cursor:pointer;transition:all var(--t);}
     .user-row-clickable:hover{background:var(--surface2);}
-
     .toolbar{display:flex;align-items:center;gap:0.6rem;margin-bottom:1.25rem;flex-wrap:wrap;}
     .search-wrap{flex:1;min-width:140px;position:relative;}
     .search-wrap svg{position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;}
     .search-input{padding-left:2.5rem !important;}
     .toolbar-actions{display:flex;gap:0.5rem;flex-shrink:0;}
-
     .breadcrumb{display:flex;align-items:center;gap:0.3rem;margin-bottom:1rem;flex-wrap:wrap;}
     .breadcrumb-item{font-size:0.85rem;font-weight:600;color:var(--text2);cursor:pointer;padding:0.2rem 0.5rem;border-radius:6px;transition:all var(--t);}
     .breadcrumb-item:hover{color:var(--accent);background:rgba(99,102,241,0.08);}
     .breadcrumb-item.active{color:var(--text);cursor:default;}
     .breadcrumb-item.active:hover{background:transparent;}
     .breadcrumb-sep{color:var(--text3);font-size:0.8rem;}
-
     .preview-content{display:flex;align-items:center;justify-content:center;min-height:300px;max-height:60vh;overflow:auto;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--glass-b);}
     .preview-content img{max-width:100%;max-height:60vh;border-radius:var(--radius-sm);}
     .preview-content iframe{width:100%;height:60vh;border:none;border-radius:var(--radius-sm);}
     .preview-content video{max-width:100%;max-height:60vh;border-radius:var(--radius-sm);}
     .preview-content pre{padding:1.5rem;color:var(--text);font-size:0.85rem;white-space:pre-wrap;word-break:break-all;text-align:left;width:100%;}
     .preview-actions{display:flex;gap:0.75rem;margin-top:1rem;}
-
     .share-url-box{display:flex;gap:0.5rem;margin-top:0.5rem;}
     .share-url-box input{flex:1;font-size:0.82rem;}
-
     .file-card{cursor:pointer;}
     .folder-card{border-color:rgba(99,102,241,0.2);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04));}
     .folder-card:hover{border-color:rgba(99,102,241,0.4);}
-
     .file-action-list{display:flex;flex-direction:column;gap:0.5rem;}
     .file-action-item{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t);}
     .file-action-item:hover{background:var(--glass-h);border-color:rgba(99,102,241,0.3);}
     .file-action-item.danger:hover{border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.05);}
     .file-action-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
     .upload-drop-zone{border:2px dashed var(--glass-b);border-radius:var(--radius);padding:2rem;text-align:center;transition:all var(--t);position:fixed;inset:0;z-index:300;background:rgba(7,9,26,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;}
     .upload-drop-zone.show{display:flex;}
     .upload-drop-zone.drag-over{border-color:var(--accent);}
     .upload-drop-zone h3{color:#fff;font-size:1.2rem;font-weight:700;}
     .upload-drop-zone p{color:rgba(255,255,255,0.6);font-size:0.9rem;}
-
     .profile-upload-wrap{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;}
     .profile-avatar-lg{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid var(--glass-b);}
     .profile-avatar-lg img{width:100%;height:100%;object-fit:cover;}
-
     .mobile-menu-btn{display:none;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px;color:var(--text);cursor:pointer;padding:0.45rem;align-items:center;justify-content:center;}
     @media(max-width:768px){
       .mobile-menu-btn{display:flex;}
@@ -223,7 +212,7 @@
     </div>
   </div>
 
-  <!-- File Action Modal (non-previewable) -->
+  <!-- File Action Modal -->
   <div class="modal-overlay" id="fileActionOverlay" onclick="handleOverlayClick(event,'fileActionOverlay')">
     <div class="glass modal">
       <div class="modal-header">
@@ -232,21 +221,15 @@
       </div>
       <div class="file-action-list">
         <div class="file-action-item" id="fileActionDownloadBtn">
-          <div class="file-action-icon" style="background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </div>
+          <div class="file-action-icon" style="background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
           <div><div class="settings-label">Download</div><div class="settings-sub">Save this file to your device</div></div>
         </div>
         <div class="file-action-item" id="fileActionShareBtn">
-          <div class="file-action-icon" style="background:rgba(6,182,212,0.12);color:#22d3ee;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </div>
+          <div class="file-action-icon" style="background:rgba(6,182,212,0.12);color:#22d3ee;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
           <div><div class="settings-label">Share</div><div class="settings-sub">Generate a shareable link</div></div>
         </div>
         <div class="file-action-item danger" id="fileActionDeleteBtn">
-          <div class="file-action-icon" style="background:rgba(244,63,94,0.12);color:var(--danger);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </div>
+          <div class="file-action-icon" style="background:rgba(244,63,94,0.12);color:var(--danger);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></div>
           <div><div class="settings-label" style="color:var(--danger);">Delete</div><div class="settings-sub">Permanently remove this file</div></div>
         </div>
       </div>
@@ -364,10 +347,7 @@
         </div>
         <div class="form-stack">
           <input type="file" id="profileFileInput" accept="image/*" style="display:none;"/>
-          <button class="btn btn-ghost" onclick="document.getElementById('profileFileInput').click()" style="width:100%;gap:0.5rem;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-            Choose Image
-          </button>
+          <button class="btn btn-ghost" onclick="document.getElementById('profileFileInput').click()" style="width:100%;gap:0.5rem;">Choose Image</button>
           <button class="btn btn-primary" id="profileUploadBtn" style="display:none;">Upload Profile Picture</button>
         </div>
       </div>
@@ -427,7 +407,6 @@
   <script src="js/api.js"></script>
   <script>
     if (!auth.require()) throw new Error("Unauthorized");
-
     const user = auth.getUser();
     if (user) {
       document.getElementById("userName").textContent = user.name;
@@ -448,11 +427,7 @@
       }
     }
 
-    const PREVIEWABLE = new Set([
-      "image/jpeg","image/png","image/gif","image/webp","image/svg+xml",
-      "application/pdf","text/plain",
-      "video/mp4","video/webm","video/ogg","video/quicktime"
-    ]);
+    const PREVIEWABLE = new Set(["image/jpeg","image/png","image/gif","image/webp","image/svg+xml","application/pdf","text/plain","video/mp4","video/webm","video/ogg","video/quicktime"]);
     const VIDEO_TYPES = new Set(["video/mp4","video/webm","video/ogg","video/quicktime"]);
 
     let currentParentId = null;
@@ -498,16 +473,11 @@
       document.getElementById("breadcrumb").innerHTML = breadcrumbs.map((item, i) => {
         const isLast = i === breadcrumbs.length - 1;
         return `${i > 0 ? '<span class="breadcrumb-sep">›</span>' : ''}
-          <span class="breadcrumb-item ${isLast ? 'active' : ''}" onclick="${isLast ? '' : `navigateTo(${item.id === null ? 'null' : item.id}, ${i})`}">${item.name}</span>`;
+          <span class="breadcrumb-item ${isLast?'active':''}" onclick="${isLast?'':` navigateTo(${item.id===null?'null':item.id},${i})`}">${item.name}</span>`;
       }).join("");
     }
 
-    function navigateTo(id, index) {
-      currentParentId = id;
-      breadcrumbs = breadcrumbs.slice(0, index + 1);
-      renderBreadcrumb();
-      loadFiles();
-    }
+    function navigateTo(id, index) { currentParentId = id; breadcrumbs = breadcrumbs.slice(0, index+1); renderBreadcrumb(); loadFiles(); }
 
     async function loadFiles() {
       const param = currentParentId !== null ? `?parent_id=${currentParentId}` : "";
@@ -517,7 +487,7 @@
       const allFiles = files.filter(f => !f.is_folder);
       document.getElementById("navCount").textContent = allFiles.length;
       document.getElementById("statFiles").textContent = allFiles.length;
-      const totalBytes = allFiles.reduce((a, f) => a + (f.file_size || 0), 0);
+      const totalBytes = allFiles.reduce((a, f) => a + (f.file_size||0), 0);
       const sizeStr = formatSize(totalBytes);
       const parts = sizeStr.match(/^([\d.]+)\s*(.+)$/);
       document.getElementById("statSize").innerHTML = parts ? `${parts[1]} <span class="unit">${parts[2]}</span>` : sizeStr;
@@ -527,44 +497,36 @@
 
     function renderFileList(files) {
       const list = document.getElementById("fileList");
-      if (!files.length) {
-        list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>This folder is empty</h3><p>Upload files or create a new folder</p></div>`;
-        return;
-      }
+      if (!files.length) { list.innerHTML = `<div class="empty"><div class="empty-icon">📂</div><h3>This folder is empty</h3><p>Upload files or create a new folder</p></div>`; return; }
       const sorted = [...files.filter(f => f.is_folder), ...files.filter(f => !f.is_folder)];
       list.innerHTML = sorted.map((f, i) => {
-        const safeName = f.file_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-        if (f.is_folder) return `
-          <div class="file-card folder-card" style="animation-delay:${i*0.04}s;" onclick="enterFolder(${f.id},'${safeName}')">
-            <div class="file-thumb">📁</div>
-            <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div></div>
-            <div class="file-actions" onclick="event.stopPropagation()">
-              <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-            </div>
-          </div>`;
-        return `
-          <div class="file-card" style="animation-delay:${i*0.04}s;" onclick="openFileAction(${f.id},'${safeName}','${f.file_type||''}')">
-            <div class="file-thumb">${fileEmoji(f.file_type)}</div>
-            <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div></div>
-            <div class="file-actions" onclick="event.stopPropagation()">
-              <button class="btn-icon" style="color:#a5b4fc;" onclick="openShare(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-              <button class="btn-icon" onclick="downloadFile(${f.id},'${safeName}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-              <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-            </div>
-          </div>`;
+        const sn = f.file_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        if (f.is_folder) return `<div class="file-card folder-card" style="animation-delay:${i*0.04}s;" onclick="enterFolder(${f.id},'${sn}')">
+          <div class="file-thumb">📁</div>
+          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div></div>
+          <div class="file-actions" onclick="event.stopPropagation()">
+            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+          </div>
+        </div>`;
+        return `<div class="file-card" style="animation-delay:${i*0.04}s;" onclick="openFileAction(${f.id},'${sn}','${f.file_type||''}')">
+          <div class="file-thumb">${fileEmoji(f.file_type)}</div>
+          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div></div>
+          <div class="file-actions" onclick="event.stopPropagation()">
+            <button class="btn-icon" style="color:#a5b4fc;" onclick="openShare(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+            <button class="btn-icon" onclick="downloadFile(${f.id},'${sn}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+          </div>
+        </div>`;
       }).join("");
     }
 
     function openFileAction(id, name, fileType) {
-      if (PREVIEWABLE.has(fileType)) {
-        previewFile(id, name, fileType);
-      } else {
-        document.getElementById("fileActionName").textContent = name;
-        document.getElementById("fileActionDownloadBtn").onclick = () => { closeModal("fileActionOverlay"); downloadFile(id, name); };
-        document.getElementById("fileActionShareBtn").onclick = () => { closeModal("fileActionOverlay"); openShare(id); };
-        document.getElementById("fileActionDeleteBtn").onclick = () => { closeModal("fileActionOverlay"); deleteItem(id); };
-        document.getElementById("fileActionOverlay").classList.add("open");
-      }
+      if (PREVIEWABLE.has(fileType)) { previewFile(id, name, fileType); return; }
+      document.getElementById("fileActionName").textContent = name;
+      document.getElementById("fileActionDownloadBtn").onclick = () => { closeModal("fileActionOverlay"); downloadFile(id, name); };
+      document.getElementById("fileActionShareBtn").onclick = () => { closeModal("fileActionOverlay"); openShare(id); };
+      document.getElementById("fileActionDeleteBtn").onclick = () => { closeModal("fileActionOverlay"); deleteItem(id); };
+      document.getElementById("fileActionOverlay").classList.add("open");
     }
 
     function enterFolder(id, name) { currentParentId = id; breadcrumbs.push({id, name}); renderBreadcrumb(); loadFiles(); }
@@ -585,15 +547,12 @@
 
       if (VIDEO_TYPES.has(fileType)) {
         const token = auth.getToken();
+        const videoUrl = `${API}/api/file/preview/${id}?token=${encodeURIComponent(token)}`;
         document.getElementById("previewContent").innerHTML =
           `<video controls style="max-width:100%;max-height:60vh;border-radius:var(--radius-sm);" preload="metadata">
-            <source src="${API}/api/file/preview/${id}#t=0.1" type="${fileType}">
+            <source src="${videoUrl}" type="${fileType}">
             <p style="color:var(--text3);padding:2rem;">Your browser does not support video playback.</p>
           </video>`;
-        const video = document.getElementById("previewContent").querySelector("video");
-        video.addEventListener("loadstart", () => {
-          video.setAttribute("headers", JSON.stringify({Authorization: `Bearer ${token}`}));
-        });
         return;
       }
 
@@ -641,8 +600,7 @@
     }
 
     document.getElementById("folderBtn").addEventListener("click", async () => {
-      const name = document.getElementById("folderName").value.trim();
-      const a = document.getElementById("folderAlert");
+      const name = document.getElementById("folderName").value.trim(); const a = document.getElementById("folderAlert");
       if (!name) { showAlert(a, "Please enter a folder name."); return; }
       const btn = document.getElementById("folderBtn"); btn.textContent = "Creating..."; btn.disabled = true;
       const body = {folder_name: name}; if (currentParentId !== null) body.parent_id = currentParentId;
@@ -661,26 +619,18 @@
 
     const fileInput = document.getElementById("fileInput");
     fileInput.addEventListener("change", () => uploadFiles(fileInput.files));
-
     const dropZone = document.getElementById("dropZone");
     let dragCounter = 0;
     document.addEventListener("dragenter", e => { e.preventDefault(); dragCounter++; dropZone.classList.add("show","drag-over"); });
-    document.addEventListener("dragleave", () => { dragCounter--; if (dragCounter <= 0) { dragCounter=0; dropZone.classList.remove("show","drag-over"); } });
+    document.addEventListener("dragleave", () => { dragCounter--; if (dragCounter<=0) { dragCounter=0; dropZone.classList.remove("show","drag-over"); } });
     document.addEventListener("dragover", e => e.preventDefault());
     document.addEventListener("drop", e => { e.preventDefault(); dragCounter=0; dropZone.classList.remove("show","drag-over"); uploadFiles(e.dataTransfer.files); });
 
     async function uploadFiles(files) {
       if (!files.length) return;
-      const alertEl = document.getElementById("uploadAlert");
-      const progressWrap = document.getElementById("progressWrap");
-      const progressFill = document.getElementById("progressFill");
-      const queue = document.getElementById("uploadQueue");
+      const alertEl = document.getElementById("uploadAlert"), progressWrap = document.getElementById("progressWrap"), progressFill = document.getElementById("progressFill"), queue = document.getElementById("uploadQueue");
       hideAlert(alertEl); progressWrap.classList.add("show"); queue.innerHTML = "";
-      [...files].forEach(f => {
-        const el = document.createElement("div"); el.className = "queue-item";
-        el.innerHTML = `<span style="font-size:1.1rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem">${f.name}</span><span style="color:var(--text3);font-size:0.74rem;flex-shrink:0">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`;
-        queue.appendChild(el);
-      });
+      [...files].forEach(f => { const el = document.createElement("div"); el.className = "queue-item"; el.innerHTML = `<span style="font-size:1.1rem">${fileEmoji(f.type)}</span><span style="flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.85rem">${f.name}</span><span style="color:var(--text3);font-size:0.74rem;flex-shrink:0">${formatSize(f.size)}</span><span class="q-status q-wait" id="qs-${f.name.replace(/\W/g,'_')}">Waiting</span>`; queue.appendChild(el); });
       let done = 0;
       for (const f of files) {
         const sid = `qs-${f.name.replace(/\W/g,'_')}`; const s = document.getElementById(sid);
@@ -717,45 +667,30 @@
     }
 
     function initProfilePanel() {
-      const u = auth.getUser();
-      const preview = document.getElementById("profilePreview");
-      if (u?.profile_image && u?.id) {
-        preview.innerHTML = `<img src="/api/user/profile-image/${u.id}" style="width:64px;height:64px;object-fit:cover;" onerror="this.parentElement.textContent='${(u.name||'?')[0].toUpperCase()}'"/>`;
-      } else {
-        preview.textContent = (u?.name||"?")[0].toUpperCase();
-      }
-      profileFile = null;
-      document.getElementById("profileUploadBtn").style.display = "none";
-      document.getElementById("profileFileInput").value = "";
+      const u = auth.getUser(); const preview = document.getElementById("profilePreview");
+      if (u?.profile_image && u?.id) { preview.innerHTML = `<img src="/api/user/profile-image/${u.id}" style="width:64px;height:64px;object-fit:cover;" onerror="this.parentElement.textContent='${(u.name||'?')[0].toUpperCase()}'"/>`; }
+      else { preview.textContent = (u?.name||"?")[0].toUpperCase(); }
+      profileFile = null; document.getElementById("profileUploadBtn").style.display = "none"; document.getElementById("profileFileInput").value = "";
     }
 
     document.getElementById("profileFileInput").addEventListener("change", (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      profileFile = file;
-      const reader = new FileReader();
-      reader.onload = (ev) => { document.getElementById("profilePreview").innerHTML = `<img src="${ev.target.result}" style="width:64px;height:64px;object-fit:cover;"/>`; };
-      reader.readAsDataURL(file);
-      document.getElementById("profileUploadBtn").style.display = "block";
+      const file = e.target.files[0]; if (!file) return; profileFile = file;
+      const reader = new FileReader(); reader.onload = (ev) => { document.getElementById("profilePreview").innerHTML = `<img src="${ev.target.result}" style="width:64px;height:64px;object-fit:cover;"/>`; };
+      reader.readAsDataURL(file); document.getElementById("profileUploadBtn").style.display = "block";
     });
 
     document.getElementById("profileUploadBtn").addEventListener("click", async () => {
       if (!profileFile) return;
-      const a = document.getElementById("profileAlert");
-      const btn = document.getElementById("profileUploadBtn"); btn.textContent = "Uploading..."; btn.disabled = true; hideAlert(a);
+      const a = document.getElementById("profileAlert"); const btn = document.getElementById("profileUploadBtn"); btn.textContent = "Uploading..."; btn.disabled = true; hideAlert(a);
       const form = new FormData(); form.append("file", profileFile);
-      const res = await apiFetch("/api/user/settings/profile-image", { method: "POST", body: form });
-      const d = await res.json();
-      if (res.ok) {
-        const u = auth.getUser(); const updated = {...u, profile_image: d.path};
-        auth.setUser(updated); updateAvatarDisplay(updated);
-        showAlert(a, "Profile picture updated!", "success"); btn.style.display = "none";
-      } else showAlert(a, d.detail || "Failed to upload.");
+      const res = await apiFetch("/api/user/settings/profile-image", { method: "POST", body: form }); const d = await res.json();
+      if (res.ok) { const u = auth.getUser(); const updated = {...u, profile_image: d.path}; auth.setUser(updated); updateAvatarDisplay(updated); showAlert(a, "Profile picture updated!", "success"); btn.style.display = "none"; }
+      else showAlert(a, d.detail || "Failed to upload.");
       btn.textContent = "Upload Profile Picture"; btn.disabled = false;
     });
 
     document.getElementById("gateBtn").addEventListener("click", async () => {
-      const pw = document.getElementById("gatePassword").value;
-      const a = document.getElementById("gateAlert");
+      const pw = document.getElementById("gatePassword").value; const a = document.getElementById("gateAlert");
       if (!pw) { showAlert(a, "Please enter your password."); return; }
       const btn = document.getElementById("gateBtn"); btn.textContent = "Verifying..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/verify", { method: "POST", body: JSON.stringify({password: pw}) });
@@ -770,13 +705,9 @@
       const newName = document.getElementById("newName").value.trim(); const a = document.getElementById("nameAlert");
       if (!newName) { showAlert(a, "Please enter a new username."); return; }
       const btn = document.getElementById("nameBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
-      const res = await apiFetch("/api/user/settings/name", { method: "PATCH", body: JSON.stringify({new_name: newName, password: verifiedPassword}) });
-      const d = await res.json();
-      if (res.ok) {
-        const u = auth.getUser(); auth.setUser({...u, name: newName}); if (d.access_token) auth.setToken(d.access_token);
-        document.getElementById("userName").textContent = newName; document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
-        showAlert(a, "Username updated!", "success"); document.getElementById("newName").value = "";
-      } else showAlert(a, d.detail || "Failed to update username.");
+      const res = await apiFetch("/api/user/settings/name", { method: "PATCH", body: JSON.stringify({new_name: newName, password: verifiedPassword}) }); const d = await res.json();
+      if (res.ok) { const u = auth.getUser(); auth.setUser({...u, name: newName}); if (d.access_token) auth.setToken(d.access_token); document.getElementById("userName").textContent = newName; document.getElementById("userAvatar").textContent = newName[0].toUpperCase(); showAlert(a, "Username updated!", "success"); document.getElementById("newName").value = ""; }
+      else showAlert(a, d.detail || "Failed to update username.");
       btn.textContent = "Update Username"; btn.disabled = false;
     });
 
@@ -784,8 +715,7 @@
       const newEmail = document.getElementById("newEmail").value.trim(); const a = document.getElementById("emailAlert");
       if (!newEmail) { showAlert(a, "Please enter a new email."); return; }
       const btn = document.getElementById("emailBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
-      const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) });
-      const d = await res.json();
+      const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) }); const d = await res.json();
       if (res.ok) { showAlert(a, "Email updated!", "success"); document.getElementById("newEmail").value = ""; }
       else showAlert(a, d.detail || "Failed to update email.");
       btn.textContent = "Update Email"; btn.disabled = false;
@@ -797,8 +727,7 @@
       if (newPassword !== newPassword2) { showAlert(a, "Passwords do not match."); return; }
       if (newPassword.length < 6) { showAlert(a, "Password must be at least 6 characters."); return; }
       const btn = document.getElementById("passwordBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
-      const res = await apiFetch("/api/user/settings/password", { method: "PATCH", body: JSON.stringify({current_password: verifiedPassword, new_password: newPassword, new_password2: newPassword2}) });
-      const d = await res.json();
+      const res = await apiFetch("/api/user/settings/password", { method: "PATCH", body: JSON.stringify({current_password: verifiedPassword, new_password: newPassword, new_password2: newPassword2}) }); const d = await res.json();
       if (res.ok) { verifiedPassword = newPassword; showAlert(a, "Password updated!", "success"); document.getElementById("newPassword").value = ""; document.getElementById("newPassword2").value = ""; }
       else showAlert(a, d.detail || "Failed to update password.");
       btn.textContent = "Update Password"; btn.disabled = false;
