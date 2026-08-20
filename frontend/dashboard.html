@@ -9,10 +9,10 @@
     .modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity 0.25s ease;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal{width:100%;max-width:440px;padding:2rem;animation:modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);}
-    .modal-lg{max-width:640px;}
+    .modal-lg{max-width:700px;}
     @keyframes modal-in{from{opacity:0;transform:scale(0.94) translateY(16px)}to{opacity:1;transform:none}}
     .modal-header{display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;}
-    .modal-title{font-size:1.1rem;font-weight:800;letter-spacing:-0.3px;flex:1;}
+    .modal-title{font-size:1.1rem;font-weight:800;letter-spacing:-0.3px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center;flex-shrink:0;}
     .modal-close:hover{color:var(--text);background:var(--surface2);}
     .modal-back{background:none;border:none;cursor:pointer;color:var(--text3);padding:0.3rem;border-radius:6px;transition:all var(--t);display:flex;align-items:center;flex-shrink:0;}
@@ -48,13 +48,22 @@
     .preview-content{display:flex;align-items:center;justify-content:center;min-height:300px;max-height:60vh;overflow:auto;border-radius:var(--radius-sm);background:var(--surface);border:1px solid var(--glass-b);}
     .preview-content img{max-width:100%;max-height:60vh;border-radius:var(--radius-sm);}
     .preview-content iframe{width:100%;height:60vh;border:none;border-radius:var(--radius-sm);}
+    .preview-content video{max-width:100%;max-height:60vh;border-radius:var(--radius-sm);}
     .preview-content pre{padding:1.5rem;color:var(--text);font-size:0.85rem;white-space:pre-wrap;word-break:break-all;text-align:left;width:100%;}
+    .preview-actions{display:flex;gap:0.75rem;margin-top:1rem;}
 
     .share-url-box{display:flex;gap:0.5rem;margin-top:0.5rem;}
     .share-url-box input{flex:1;font-size:0.82rem;}
 
+    .file-card{cursor:pointer;}
     .folder-card{border-color:rgba(99,102,241,0.2);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(139,92,246,0.04));}
     .folder-card:hover{border-color:rgba(99,102,241,0.4);}
+
+    .file-action-list{display:flex;flex-direction:column;gap:0.5rem;}
+    .file-action-item{display:flex;align-items:center;gap:0.85rem;padding:0.85rem 1rem;border-radius:var(--radius-sm);border:1px solid var(--glass-b);background:var(--glass);cursor:pointer;transition:all var(--t);}
+    .file-action-item:hover{background:var(--glass-h);border-color:rgba(99,102,241,0.3);}
+    .file-action-item.danger:hover{border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.05);}
+    .file-action-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
     .upload-drop-zone{border:2px dashed var(--glass-b);border-radius:var(--radius);padding:2rem;text-align:center;transition:all var(--t);position:fixed;inset:0;z-index:300;background:rgba(7,9,26,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;}
     .upload-drop-zone.show{display:flex;}
@@ -184,7 +193,6 @@
         <div class="progress-wrap" id="progressWrap" style="margin-bottom:1rem;"><div class="progress-fill" id="progressFill"></div></div>
         <div id="uploadQueue" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
         <div id="uploadAlert" class="alert" style="margin-bottom:1rem;"></div>
-
         <div class="breadcrumb" id="breadcrumb"></div>
         <div id="fileList" class="file-list"></div>
       </div>
@@ -196,10 +204,52 @@
     <div class="glass modal modal-lg">
       <div class="modal-header">
         <span class="modal-title" id="previewTitle">Preview</span>
-        <button class="btn btn-ghost btn-sm" id="previewDownloadBtn">Download</button>
         <button class="modal-close" onclick="closeModal('previewOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="preview-content" id="previewContent"></div>
+      <div class="preview-actions">
+        <button class="btn btn-primary" id="previewDownloadBtn" style="flex:1;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+        <button class="btn btn-ghost" id="previewShareBtn" style="flex:1;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+        <button class="btn btn-ghost" id="previewDeleteBtn" style="color:var(--danger);border-color:rgba(244,63,94,0.3);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Action Modal (non-previewable) -->
+  <div class="modal-overlay" id="fileActionOverlay" onclick="handleOverlayClick(event,'fileActionOverlay')">
+    <div class="glass modal">
+      <div class="modal-header">
+        <span class="modal-title" id="fileActionName"></span>
+        <button class="modal-close" onclick="closeModal('fileActionOverlay')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="file-action-list">
+        <div class="file-action-item" id="fileActionDownloadBtn">
+          <div class="file-action-icon" style="background:linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.18));color:#a5b4fc;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div><div class="settings-label">Download</div><div class="settings-sub">Save this file to your device</div></div>
+        </div>
+        <div class="file-action-item" id="fileActionShareBtn">
+          <div class="file-action-icon" style="background:rgba(6,182,212,0.12);color:#22d3ee;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </div>
+          <div><div class="settings-label">Share</div><div class="settings-sub">Generate a shareable link</div></div>
+        </div>
+        <div class="file-action-item danger" id="fileActionDeleteBtn">
+          <div class="file-action-icon" style="background:rgba(244,63,94,0.12);color:var(--danger);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </div>
+          <div><div class="settings-label" style="color:var(--danger);">Delete</div><div class="settings-sub">Permanently remove this file</div></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -258,8 +308,6 @@
   <!-- Settings Modal -->
   <div class="modal-overlay" id="settingsOverlay" onclick="handleOverlayClick(event,'settingsOverlay')">
     <div class="glass modal">
-
-      <!-- Gate -->
       <div id="gatePanel">
         <div class="modal-header">
           <span class="modal-title">Confirm Identity</span>
@@ -275,8 +323,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Settings Menu -->
       <div id="settingsPanel" style="display:none;">
         <div class="modal-header">
           <span class="modal-title">Account Settings</span>
@@ -301,12 +347,10 @@
           </div>
           <div class="settings-item danger" id="deleteAccountItem" onclick="showSubPanel('deletePanel')">
             <div class="settings-icon red"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>
-            <div><div class="settings-label" style="color:var(--danger);">Delete Account</div><div class="settings-sub">Permanently remove your account and all files</div></div>
+            <div><div class="settings-label" style="color:var(--danger);">Delete Account</div><div class="settings-sub">Permanently remove your account</div></div>
           </div>
         </div>
       </div>
-
-      <!-- Profile Picture -->
       <div id="profilePanel" style="display:none;">
         <div class="modal-header">
           <button class="modal-back" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -316,10 +360,7 @@
         <div id="profileAlert" class="alert" style="margin-bottom:1rem;"></div>
         <div class="profile-upload-wrap">
           <div class="profile-avatar-lg" id="profilePreview"></div>
-          <div>
-            <p style="font-size:0.88rem;font-weight:600;margin-bottom:0.3rem;">Current avatar</p>
-            <p style="font-size:0.78rem;color:var(--text3);">JPG, PNG, WEBP or GIF. Max 5MB.</p>
-          </div>
+          <div><p style="font-size:0.88rem;font-weight:600;margin-bottom:0.3rem;">Current avatar</p><p style="font-size:0.78rem;color:var(--text3);">JPG, PNG, WEBP or GIF. Max 5MB.</p></div>
         </div>
         <div class="form-stack">
           <input type="file" id="profileFileInput" accept="image/*" style="display:none;"/>
@@ -330,8 +371,6 @@
           <button class="btn btn-primary" id="profileUploadBtn" style="display:none;">Upload Profile Picture</button>
         </div>
       </div>
-
-      <!-- Change Username -->
       <div id="namePanel" style="display:none;">
         <div class="modal-header">
           <button class="modal-back" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -344,8 +383,6 @@
           <button class="btn btn-primary" id="nameBtn">Update Username</button>
         </div>
       </div>
-
-      <!-- Change Email -->
       <div id="emailPanel" style="display:none;">
         <div class="modal-header">
           <button class="modal-back" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -358,8 +395,6 @@
           <button class="btn btn-primary" id="emailBtn">Update Email</button>
         </div>
       </div>
-
-      <!-- Change Password -->
       <div id="passwordPanel" style="display:none;">
         <div class="modal-header">
           <button class="modal-back" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -373,8 +408,6 @@
           <button class="btn btn-primary" id="passwordBtn">Update Password</button>
         </div>
       </div>
-
-      <!-- Delete Account -->
       <div id="deletePanel" style="display:none;">
         <div class="modal-header">
           <button class="modal-back" onclick="showSubPanel(null)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></button>
@@ -388,7 +421,6 @@
           <button class="btn" id="deleteBtn" style="background:var(--danger);color:#fff;width:100%;box-shadow:0 4px 18px rgba(244,63,94,0.35);">Delete My Account</button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -409,14 +441,19 @@
 
     function updateAvatarDisplay(u) {
       const el = document.getElementById("userAvatar");
-      if (u.profile_image) {
-        el.style.background = "none";
+      if (u && u.id && u.profile_image) {
         el.innerHTML = `<img src="/api/user/profile-image/${u.id}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;" onerror="this.parentElement.textContent='${(u.name||'?')[0].toUpperCase()}'"/>`;
       } else {
-        el.style.background = "";
-        el.textContent = (u.name||"?")[0].toUpperCase();
+        el.textContent = (u?.name||"?")[0].toUpperCase();
       }
     }
+
+    const PREVIEWABLE = new Set([
+      "image/jpeg","image/png","image/gif","image/webp","image/svg+xml",
+      "application/pdf","text/plain",
+      "video/mp4","video/webm","video/ogg","video/quicktime"
+    ]);
+    const VIDEO_TYPES = new Set(["video/mp4","video/webm","video/ogg","video/quicktime"]);
 
     let currentParentId = null;
     let breadcrumbs = [{id: null, name: "My Drive"}];
@@ -496,25 +533,38 @@
       }
       const sorted = [...files.filter(f => f.is_folder), ...files.filter(f => !f.is_folder)];
       list.innerHTML = sorted.map((f, i) => {
-        if (f.is_folder) return `<div class="file-card folder-card" style="animation-delay:${i*0.04}s;cursor:pointer;" onclick="enterFolder(${f.id},'${f.file_name.replace(/'/g,"\\'")}')">
-          <div class="file-thumb">📁</div>
-          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div></div>
-          <div class="file-actions" onclick="event.stopPropagation()">
-            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-          </div>
-        </div>`;
-        const previewable = ["image/jpeg","image/png","image/gif","image/webp","image/svg+xml","application/pdf","text/plain"].includes(f.file_type);
-        return `<div class="file-card" style="animation-delay:${i*0.04}s">
-          <div class="file-thumb">${fileEmoji(f.file_type)}</div>
-          <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div></div>
-          <div class="file-actions">
-            ${previewable ? `<button class="btn-icon" onclick="previewFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>` : ""}
-            <button class="btn-icon" style="color:#a5b4fc;" onclick="openShare(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
-            <button class="btn-icon" onclick="downloadFile(${f.id},'${f.file_name.replace(/'/g,"\\'")}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-            <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
-          </div>
-        </div>`;
+        const safeName = f.file_name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        if (f.is_folder) return `
+          <div class="file-card folder-card" style="animation-delay:${i*0.04}s;" onclick="enterFolder(${f.id},'${safeName}')">
+            <div class="file-thumb">📁</div>
+            <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>Folder</span><span>${formatDate(f.create_date)}</span></div></div>
+            <div class="file-actions" onclick="event.stopPropagation()">
+              <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+            </div>
+          </div>`;
+        return `
+          <div class="file-card" style="animation-delay:${i*0.04}s;" onclick="openFileAction(${f.id},'${safeName}','${f.file_type||''}')">
+            <div class="file-thumb">${fileEmoji(f.file_type)}</div>
+            <div class="file-info"><div class="file-name">${f.file_name}</div><div class="file-meta-row"><span>${formatSize(f.file_size)}</span><span>${f.file_type||"Unknown"}</span><span>${formatDate(f.create_date)}</span></div></div>
+            <div class="file-actions" onclick="event.stopPropagation()">
+              <button class="btn-icon" style="color:#a5b4fc;" onclick="openShare(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+              <button class="btn-icon" onclick="downloadFile(${f.id},'${safeName}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+              <button class="btn-icon danger" onclick="deleteItem(${f.id})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+            </div>
+          </div>`;
       }).join("");
+    }
+
+    function openFileAction(id, name, fileType) {
+      if (PREVIEWABLE.has(fileType)) {
+        previewFile(id, name, fileType);
+      } else {
+        document.getElementById("fileActionName").textContent = name;
+        document.getElementById("fileActionDownloadBtn").onclick = () => { closeModal("fileActionOverlay"); downloadFile(id, name); };
+        document.getElementById("fileActionShareBtn").onclick = () => { closeModal("fileActionOverlay"); openShare(id); };
+        document.getElementById("fileActionDeleteBtn").onclick = () => { closeModal("fileActionOverlay"); deleteItem(id); };
+        document.getElementById("fileActionOverlay").classList.add("open");
+      }
     }
 
     function enterFolder(id, name) { currentParentId = id; breadcrumbs.push({id, name}); renderBreadcrumb(); loadFiles(); }
@@ -525,11 +575,28 @@
       const a = document.createElement("a"); a.href = URL.createObjectURL(await res.blob()); a.download = name; a.click(); URL.revokeObjectURL(a.href);
     }
 
-    async function previewFile(id, name) {
+    async function previewFile(id, name, fileType) {
       document.getElementById("previewTitle").textContent = name;
       document.getElementById("previewContent").innerHTML = `<div style="color:var(--text3);padding:2rem;">Loading...</div>`;
       document.getElementById("previewDownloadBtn").onclick = () => downloadFile(id, name);
+      document.getElementById("previewShareBtn").onclick = () => { closeModal("previewOverlay"); openShare(id); };
+      document.getElementById("previewDeleteBtn").onclick = () => { closeModal("previewOverlay"); deleteItem(id); };
       document.getElementById("previewOverlay").classList.add("open");
+
+      if (VIDEO_TYPES.has(fileType)) {
+        const token = auth.getToken();
+        document.getElementById("previewContent").innerHTML =
+          `<video controls style="max-width:100%;max-height:60vh;border-radius:var(--radius-sm);" preload="metadata">
+            <source src="${API}/api/file/preview/${id}#t=0.1" type="${fileType}">
+            <p style="color:var(--text3);padding:2rem;">Your browser does not support video playback.</p>
+          </video>`;
+        const video = document.getElementById("previewContent").querySelector("video");
+        video.addEventListener("loadstart", () => {
+          video.setAttribute("headers", JSON.stringify({Authorization: `Bearer ${token}`}));
+        });
+        return;
+      }
+
       const res = await fetch(`${API}/api/file/preview/${id}`, { headers: { Authorization: `Bearer ${auth.getToken()}` } });
       if (!res.ok) { document.getElementById("previewContent").innerHTML = `<div style="color:var(--danger);padding:2rem;">Preview not available.</div>`; return; }
       const contentType = res.headers.get("content-type") || "";
@@ -646,19 +713,15 @@
     function showSubPanel(name) {
       ["profilePanel","namePanel","emailPanel","passwordPanel","deletePanel"].forEach(p => document.getElementById(p).style.display = "none");
       document.getElementById("settingsPanel").style.display = name ? "none" : "block";
-      if (name) {
-        document.getElementById(name).style.display = "block";
-        if (name === "profilePanel") initProfilePanel();
-      }
+      if (name) { document.getElementById(name).style.display = "block"; if (name === "profilePanel") initProfilePanel(); }
     }
 
     function initProfilePanel() {
       const u = auth.getUser();
       const preview = document.getElementById("profilePreview");
-      if (u?.profile_image) {
+      if (u?.profile_image && u?.id) {
         preview.innerHTML = `<img src="/api/user/profile-image/${u.id}" style="width:64px;height:64px;object-fit:cover;" onerror="this.parentElement.textContent='${(u.name||'?')[0].toUpperCase()}'"/>`;
       } else {
-        preview.style.background = "linear-gradient(135deg,var(--accent),var(--accent2))";
         preview.textContent = (u?.name||"?")[0].toUpperCase();
       }
       profileFile = null;
@@ -667,14 +730,10 @@
     }
 
     document.getElementById("profileFileInput").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const file = e.target.files[0]; if (!file) return;
       profileFile = file;
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        const preview = document.getElementById("profilePreview");
-        preview.innerHTML = `<img src="${ev.target.result}" style="width:64px;height:64px;object-fit:cover;"/>`;
-      };
+      reader.onload = (ev) => { document.getElementById("profilePreview").innerHTML = `<img src="${ev.target.result}" style="width:64px;height:64px;object-fit:cover;"/>`; };
       reader.readAsDataURL(file);
       document.getElementById("profileUploadBtn").style.display = "block";
     });
@@ -687,12 +746,10 @@
       const res = await apiFetch("/api/user/settings/profile-image", { method: "POST", body: form });
       const d = await res.json();
       if (res.ok) {
-        const u = auth.getUser();
-        auth.setUser({...u, profile_image: d.path});
-        updateAvatarDisplay({...u, profile_image: d.path});
-        showAlert(a, "Profile picture updated!", "success");
-        btn.style.display = "none";
-      } else showAlert(a, d.detail || "Failed to upload profile picture.");
+        const u = auth.getUser(); const updated = {...u, profile_image: d.path};
+        auth.setUser(updated); updateAvatarDisplay(updated);
+        showAlert(a, "Profile picture updated!", "success"); btn.style.display = "none";
+      } else showAlert(a, d.detail || "Failed to upload.");
       btn.textContent = "Upload Profile Picture"; btn.disabled = false;
     });
 
@@ -710,24 +767,21 @@
     document.getElementById("gatePassword").addEventListener("keydown", e => { if (e.key==="Enter") document.getElementById("gateBtn").click(); });
 
     document.getElementById("nameBtn").addEventListener("click", async () => {
-      const newName = document.getElementById("newName").value.trim();
-      const a = document.getElementById("nameAlert");
+      const newName = document.getElementById("newName").value.trim(); const a = document.getElementById("nameAlert");
       if (!newName) { showAlert(a, "Please enter a new username."); return; }
       const btn = document.getElementById("nameBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/name", { method: "PATCH", body: JSON.stringify({new_name: newName, password: verifiedPassword}) });
       const d = await res.json();
       if (res.ok) {
         const u = auth.getUser(); auth.setUser({...u, name: newName}); if (d.access_token) auth.setToken(d.access_token);
-        document.getElementById("userName").textContent = newName;
-        document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
+        document.getElementById("userName").textContent = newName; document.getElementById("userAvatar").textContent = newName[0].toUpperCase();
         showAlert(a, "Username updated!", "success"); document.getElementById("newName").value = "";
       } else showAlert(a, d.detail || "Failed to update username.");
       btn.textContent = "Update Username"; btn.disabled = false;
     });
 
     document.getElementById("emailBtn").addEventListener("click", async () => {
-      const newEmail = document.getElementById("newEmail").value.trim();
-      const a = document.getElementById("emailAlert");
+      const newEmail = document.getElementById("newEmail").value.trim(); const a = document.getElementById("emailAlert");
       if (!newEmail) { showAlert(a, "Please enter a new email."); return; }
       const btn = document.getElementById("emailBtn"); btn.textContent = "Updating..."; btn.disabled = true; hideAlert(a);
       const res = await apiFetch("/api/user/settings/email", { method: "PATCH", body: JSON.stringify({new_email: newEmail, password: verifiedPassword}) });
@@ -738,9 +792,7 @@
     });
 
     document.getElementById("passwordBtn").addEventListener("click", async () => {
-      const newPassword = document.getElementById("newPassword").value;
-      const newPassword2 = document.getElementById("newPassword2").value;
-      const a = document.getElementById("passwordAlert");
+      const newPassword = document.getElementById("newPassword").value; const newPassword2 = document.getElementById("newPassword2").value; const a = document.getElementById("passwordAlert");
       if (!newPassword || !newPassword2) { showAlert(a, "Please fill in all fields."); return; }
       if (newPassword !== newPassword2) { showAlert(a, "Passwords do not match."); return; }
       if (newPassword.length < 6) { showAlert(a, "Password must be at least 6 characters."); return; }
@@ -753,8 +805,7 @@
     });
 
     document.getElementById("deleteBtn").addEventListener("click", async () => {
-      const confirmText = document.getElementById("deleteConfirm").value;
-      const a = document.getElementById("deleteAlert");
+      const confirmText = document.getElementById("deleteConfirm").value; const a = document.getElementById("deleteAlert");
       if (confirmText !== "DELETE") { showAlert(a, "Type DELETE (all caps) to confirm."); return; }
       const btn = document.getElementById("deleteBtn"); btn.textContent = "Deleting..."; btn.disabled = true;
       const res = await apiFetch("/api/user/settings/delete", { method: "DELETE", body: JSON.stringify({password: verifiedPassword}) });
@@ -762,8 +813,7 @@
       else { const d = await res.json(); showAlert(a, d.detail || "Failed to delete account."); btn.textContent = "Delete My Account"; btn.disabled = false; }
     });
 
-    document.addEventListener("keydown", e => { if (e.key==="Escape") ["previewOverlay","shareOverlay","folderOverlay","settingsOverlay"].forEach(closeModal); });
-
+    document.addEventListener("keydown", e => { if (e.key==="Escape") ["previewOverlay","fileActionOverlay","shareOverlay","folderOverlay","settingsOverlay"].forEach(closeModal); });
     loadFiles();
   </script>
 </body>
