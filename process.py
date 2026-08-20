@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from starlette import status
@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from db import get_db
 from models import Users, Files, SharedLinks
-from auth import get_current_user
+from auth import get_current_user, SECRET_KEY, ALGORITHM
+from jose import jwt, JWTError
 import os
 import shutil
 import uuid
@@ -180,27 +181,14 @@ def download_file(
 def preview_file(
     file_id: int,
     token: str = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
 ):
-    try:
-        from auth import SECRET_KEY, ALGORITHM
-        from jose import jwt, JWTError
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if not username:
-            raise HTTPException(status_code=401, detail="Invalid token.")
-    except:
-        raise HTTPException(status_code=401, detail="Invalid token.")
-
-    current_user = db.query(Users).filter(Users.name == username).first()
-    if not current_user:
-        raise HTTPException(status_code=401, detail="User not found.")
-
     file = _get_owned_file(db, file_id, current_user)
     if file.is_folder:
-        raise HTTPException(status_code=400, detail="Cannot preview a folder.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot preview a folder.")
     if file.file_type not in PREVIEWABLE:
-        raise HTTPException(status_code=415, detail="This file type cannot be previewed.")
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="This file type cannot be previewed.")
     return FileResponse(
         path=file.file_path,
         media_type=file.file_type,
