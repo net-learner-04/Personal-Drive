@@ -179,14 +179,28 @@ def download_file(
 @router.get("/preview/{file_id}")
 def preview_file(
     file_id: int,
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    token: str = Query(None),
+    db: Session = Depends(get_db)
 ):
+    try:
+        from auth import SECRET_KEY, ALGORITHM
+        from jose import jwt, JWTError
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token.")
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token.")
+
+    current_user = db.query(Users).filter(Users.name == username).first()
+    if not current_user:
+        raise HTTPException(status_code=401, detail="User not found.")
+
     file = _get_owned_file(db, file_id, current_user)
     if file.is_folder:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot preview a folder.")
+        raise HTTPException(status_code=400, detail="Cannot preview a folder.")
     if file.file_type not in PREVIEWABLE:
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="This file type cannot be previewed.")
+        raise HTTPException(status_code=415, detail="This file type cannot be previewed.")
     return FileResponse(
         path=file.file_path,
         media_type=file.file_type,
