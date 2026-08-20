@@ -19,7 +19,11 @@ load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-PREVIEWABLE = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml", "application/pdf", "text/plain"}
+PREVIEWABLE = {
+    "image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml",
+    "application/pdf", "text/plain",
+    "video/mp4", "video/webm", "video/ogg", "video/quicktime"
+}
 
 router = APIRouter(prefix="/api/file")
 
