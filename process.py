@@ -187,7 +187,11 @@ def preview_file(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot preview a folder.")
     if file.file_type not in PREVIEWABLE:
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="This file type cannot be previewed.")
-    return FileResponse(path=file.file_path, media_type=file.file_type)
+    return FileResponse(
+        path=file.file_path,
+        media_type=file.file_type,
+        headers={"Accept-Ranges": "bytes"}
+    )
 
 
 @router.patch("/move")
