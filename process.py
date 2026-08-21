@@ -181,14 +181,28 @@ def download_file(
 def preview_file(
     file_id: int,
     token: str = Query(None),
-    db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token required.")
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if not username:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token.")
+
+    current_user = db.query(Users).filter(Users.name == username).first()
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found.")
+
     file = _get_owned_file(db, file_id, current_user)
     if file.is_folder:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot preview a folder.")
     if file.file_type not in PREVIEWABLE:
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="This file type cannot be previewed.")
+
     return FileResponse(
         path=file.file_path,
         media_type=file.file_type,
