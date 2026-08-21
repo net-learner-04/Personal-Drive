@@ -1,8 +1,6 @@
-const API = window.location.origin;
-
 const theme = {
   init() {
-    const saved = localStorage.getItem("theme") || "dark";
+    const saved = localStorage.getItem("theme") || "light";
     document.documentElement.setAttribute("data-theme", saved);
     this._sync(saved);
   },
@@ -23,12 +21,17 @@ const theme = {
 };
 
 const auth = {
-  getToken() { return localStorage.getItem("token"); },
-  setToken(t) { localStorage.setItem("token", t); },
-  getUser() { try { return JSON.parse(localStorage.getItem("user")); } catch { return null; } },
-  setUser(u) { localStorage.setItem("user", JSON.stringify(u)); },
-  logout() { localStorage.clear(); window.location.href = "/login.html"; },
-  require() { if (!this.getToken()) { window.location.href = "/login.html"; return false; } return true; }
+  getToken() { return sessionStorage.getItem("token"); },
+  setToken(t) { sessionStorage.setItem("token", t); },
+  getUser() {
+    try { return JSON.parse(sessionStorage.getItem("user")); } catch { return null; }
+  },
+  setUser(u) { sessionStorage.setItem("user", JSON.stringify(u)); },
+  logout() { sessionStorage.clear(); window.location.href = "/login.html"; },
+  require() {
+    if (!this.getToken()) { window.location.href = "/login.html"; return false; }
+    return true;
+  }
 };
 
 async function apiFetch(path, options = {}) {
