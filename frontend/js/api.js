@@ -1,3 +1,5 @@
+const API = window.location.origin;
+
 const theme = {
   init() {
     const saved = localStorage.getItem("theme") || "light";
@@ -27,7 +29,11 @@ const auth = {
     try { return JSON.parse(sessionStorage.getItem("user")); } catch { return null; }
   },
   setUser(u) { sessionStorage.setItem("user", JSON.stringify(u)); },
-  logout() { sessionStorage.clear(); window.location.href = "/login.html"; },
+  logout() {
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  window.location.href = "/login.html";
+  },
   require() {
     if (!this.getToken()) { window.location.href = "/login.html"; return false; }
     return true;
