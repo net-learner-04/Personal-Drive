@@ -267,3 +267,13 @@ def admin_dormant_unlock(
 @router.get("/admin/config")
 def get_config(current_user: Users = Depends(require_admin)):
     return {"max_account": user_crud.MAX_ACCOUNT}
+
+
+@router.delete("/settings/profile-image", status_code=status.HTTP_204_NO_CONTENT)
+def delete_profile_image(
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.profile_image and os.path.exists(current_user.profile_image):
+        os.remove(current_user.profile_image)
+    user_crud.update_profile_image(db, current_user, None)
