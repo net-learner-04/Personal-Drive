@@ -44,6 +44,10 @@ class FileMoveBody(BaseModel):
     new_parent_id: Optional[int] = None
 
 
+class FileRename(BaseModel):
+    new_name: str
+
+
 def _get_owned_file(db: Session, file_id: int, user: Users):
     f = db.query(Files).filter(
         Files.id == file_id,
@@ -96,6 +100,27 @@ async def upload_file(
     db.add(db_file)
     db.commit()
     return {"filename": file.filename, "size": file_size}
+
+
+@router.patch("/rename/{file_id}")
+def rename_file(
+    file_id: int,
+    body: FileRename,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    if not body.new_name or not body.new_name.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Name cannot be empty.")
+    file = _get_owned_file(db, file_id, current_user)
+    parent_dir = os.path.dirname(file.file_path)
+    new_path = os.path.join(parent_dir, body.new_name)
+    if os.path.exists(new_path):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A file or folder with this name already exists.")
+    os.rename(file.file_path, new_path)
+    file.file_name = body.new_name
+    file.file_path = new_path
+    db.commit()
+    return {"message": "Renamed successfully."}
 
 
 @router.post("/folder", status_code=status.HTTP_201_CREATED)
