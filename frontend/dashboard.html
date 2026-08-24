@@ -500,16 +500,23 @@
 
     async function loadFiles() {
       const param = currentParentId !== null ? `?parent_id=${currentParentId}` : "";
-      const res = await apiFetch(`/api/file/list${param}`);
-      if (!res) return;
+      const [res, statsRes] = await Promise.all([
+        apiFetch(`/api/file/list${param}`),
+        apiFetch("/api/file/stats")
+      ]);
+      if (!res || !statsRes) return;
+    
       const files = await res.json();
-      const allFiles = files.filter(f => !f.is_folder);
-      document.getElementById("navCount").textContent = allFiles.length;
-      document.getElementById("statFiles").textContent = allFiles.length;
-      const totalBytes = allFiles.reduce((a, f) => a + (f.file_size||0), 0);
-      const sizeStr = formatSize(totalBytes);
+      const stats = await statsRes.json();
+
+      document.getElementById("navCount").textContent = stats.total_files;
+      document.getElementById("statFiles").textContent = stats.total_files;
+      const sizeStr = formatSize(stats.total_size);
       const parts = sizeStr.match(/^([\d.]+)\s*(.+)$/);
-      document.getElementById("statSize").innerHTML = parts ? `${parts[1]} <span class="unit">${parts[2]}</span>` : sizeStr;
+      document.getElementById("statSize").innerHTML = parts
+        ? `${parts[1]} <span class="unit">${parts[2]}</span>`
+        : sizeStr;
+    
       renderBreadcrumb();
       renderFileList(sortFiles(files));
     }
