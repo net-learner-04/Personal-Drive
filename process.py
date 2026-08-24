@@ -59,6 +59,20 @@ def _get_owned_file(db: Session, file_id: int, user: Users):
     return f
 
 
+@router.get("/stats")
+def get_stats(
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    all_files = db.query(Files).filter(
+        Files.file_owner == current_user.id,
+        Files.is_deleted == False,
+        Files.is_folder == False
+    ).all()
+    total_size = sum(f.file_size or 0 for f in all_files)
+    return {"total_files": len(all_files), "total_size": total_size}
+
+
 @router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile = File(...),
